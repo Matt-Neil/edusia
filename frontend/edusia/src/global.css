@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&family=Quicksand:wght@300;400&display=swap');
+
+body {
+    margin: 0;
+    background-color: #F2F3F7;
+}
+.wholeBody {
+  display: flex;
+  height: 100vh;
+}
+.mainBody {
+  width: 100%;
+}
+.innerBody {
+  margin: 0 25px 25px 25px;
+}
+.sideBarExpanded {
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  width: 100%;
+  min-width: 200px;
+  background-color: #142843;
+}
+.sideBarCollapsed {
+  display: flex;
+  flex-direction: column;
+  width: 80px;
+  background-color: #142843;
+}
+.sideBarTitle {
+  height: 70px;
+  border-bottom: 1px #EAEBEE solid;
+}
+.titleExpanded {
+  margin: 15px 25px;
+  font-family: 'Quicksand', sans-serif;
+  color: white;
+  font-size: 32px;
+  font-weight: 100;
+}
+.titleCollapsed {
+  margin: 15px 20px;
+  font-family: 'Quicksand', sans-serif;
+  color: white;
+  font-size: 32px;
+  font-weight: 100;
+}
+.sideBarUser {
+  display: flex;
+  align-items: center;
+  height: 170px;
+  border-bottom: 1px #EAEBEE solid;
+}
+.userPictureExpanded {
+  width: 100px;
+  height: 100px;
+  margin: 35px 25px;
+  border-radius: 50px;
+}
+.userPictureCollapsed {
+  width: 40px;
+  height: 40px;
+  margin: 35px 20px;
+  border-radius: 50px;
+}
+.userName {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  color: white;
+  font-weight: 500;
+}
+.sideBarPages {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: auto;
+  background-color: #34495D;
+}
+.sideBarLink:first-child {
+  margin: 40px 25px 20px 25px;
+}
+.sideBarLink {
+  text-align: left;
+  margin: 20px 25px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
+.sideBarCollapse {
+  color: white;
+  position: absolute;
+  right: 15px;
+  bottom: 20px;
+  cursor: pointer;
+}
+.header {
+  display: flex;
+  align-items: center;
+  height: 70px;
+  background-color: white;
+  border-bottom: 1px #EAEBEE solid;
+}
+.headerLocation {
+  margin: 0 0 0 25px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  color: #2B2B2B;
+  font-weight: 300;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 60px;
+  background-color: #FBFBFB;
+  border-bottom: 1px #EAEBEE solid;
+}
+.homeworkCard {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 100px;
+  margin: 25px 0;
+  height: fit-content;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.homeworkCardTitle {
+  margin: 0 25px;
+  flex: 5;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.homeworkCardInfo {
+  min-width: 125px;
+  margin: 0 25px 0 25px;
+  flex: 1;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 200;
+}
+.homeworkCardInfo:nth-child(2) {
+  text-align: center;
+}
+.homeworkCardInfo:nth-child(3) {
+  text-align: center;
+}
+.homeworkCardInfo:last-child {
+  text-align: end;
+}
+.userPageRows {
+  display: flex;
+  flex-wrap: wrap;
+}
+.classCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+  height: 150px;
+  margin: 25px 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.classCardTitle {
+  margin: 20px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.classCardInfo {
+  position: absolute;
+  bottom: 0;
+  margin: 20px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 200;
+}
