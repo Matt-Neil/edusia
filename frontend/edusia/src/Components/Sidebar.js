@@ -40,23 +40,21 @@ const Sidebar = ({currentUser}) => {
                     <div className="sideBarPages">
                         {currentUser.position === "student" &&
                             <>
-                                <Link className="sideBarLink" to="/">My Homework</Link>
-                                <Link className="sideBarLink" to="/noticeboard">Notice Board</Link>
-                                <Link className="sideBarLink" to="/settings">Settings</Link>
+                                <Link className="sideBarLink" to={`/home`}>My Homework</Link>
+                                <Link className="sideBarLink" to={`/noticeboard`}>Notice Board</Link>
                             </>
                         }
                         {currentUser.position === "teacher" &&
                             <>
-                                <Link className="sideBarLink" to="/">My Classes</Link>
-                                <Link className="sideBarLink" to="/settings">Settings</Link>
+                                <Link className="sideBarLink" to={`/home`}>My Classes</Link>
                             </>
                         }
                         {currentUser.position === "school" &&
                             <>
-                                <Link className="sideBarLink" to="/">Home</Link>
-                                <Link className="sideBarLink" to="/settings">Settings</Link>
+                                <Link className="sideBarLink" to={`/home`}>Home</Link>
                             </>
                         }
+                        <Link className="sideBarLink" to={`/settings`}>Settings</Link>
                         <p className="sideBarLink" onClick={() => {logout()}}>Logout</p>
                         <ArrowBackIosIcon className="sideBarCollapse" onClick={() => {changeSidebar(false)}} />
                     </div>
@@ -67,26 +65,26 @@ const Sidebar = ({currentUser}) => {
                         <p className="titleCollapsed">ed</p>
                     </div>
                     <div className="sideBarUser">
-                        <img src="https://via.placeholder.com/40" className="userPictureCollapsed" />
+                        <img src={`http://localhost:5000/uploads/${currentUser.picture}`} className="userPictureCollapsed" />
                     </div>
                     <div className="sideBarPages">
                         {currentUser.position === "student" &&
                             <>
-                                <Link className="sideBarLink" to="/"><ListAltIcon /></Link>
-                                <Link className="sideBarLink" to="/noticeboard"><AssignmentIcon /></Link>
+                                <Link className="sideBarLink" to={`/home`}><ListAltIcon /></Link>
+                                <Link className="sideBarLink" to={`/noticeboard`}><AssignmentIcon /></Link>
                             </>
                         }
                         {currentUser.position === "teacher" &&
                             <>
-                                <Link className="sideBarLink" to="/"><ImportContactsIcon /></Link>
+                                <Link className="sideBarLink" to={`/home`}><ImportContactsIcon /></Link>
                             </>
                         }
                         {currentUser.position === "school" &&
                             <>
-                                <Link className="sideBarLink" to="/"><HomeIcon /></Link>
+                                <Link className="sideBarLink" to={`/home`}><HomeIcon /></Link>
                             </>
                         }
-                        <Link className="sideBarLink" to="/settings"><SettingsIcon /></Link>
+                        <Link className="sideBarLink" to={`/settings`}><SettingsIcon /></Link>
                         <p className="sideBarLink" onClick={() => {logout()}}><ExitToAppIcon /></p>
                         <ArrowForwardIosIcon className="sideBarCollapse" onClick={() => {changeSidebar(true)}} />
                     </div>

@@ -1,7 +1,7 @@
 const fs = require('fs');
 
-exports.removeImage = async (req, res, next) => {
-    const path = `uploads/${req.body.picture}`
+exports.removeFile = async (req, res, next) => {
+    const path = `uploads/${req.body.file}`
 
     fs.unlink(path, (err) => {
         if (err) {
@@ -11,7 +11,7 @@ exports.removeImage = async (req, res, next) => {
     })
 }
 
-exports.uploadImage = async (req, res, next) => {
+exports.uploadFile = async (req, res, next) => {
     try {
         res.status(201).json({
             success: true,

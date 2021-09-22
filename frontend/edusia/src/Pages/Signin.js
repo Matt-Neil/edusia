@@ -4,7 +4,7 @@ import { CurrentUserContext } from '../Contexts/currentUserContext';
 
 const LogIn = () => {
     const [login, setLogin] = useState(true);
-    const [loginEmail, setLoginEmail] = useState("ks3258");
+    const [loginEmail, setLoginEmail] = useState("ks3829@email.com");
     const [loginPassword, setLoginPassword] = useState("password");
     const [name, setName] = useState();
     const [email, setEmail] = useState();
@@ -32,7 +32,7 @@ const LogIn = () => {
                     picture: response.data.data.picture
                 })
 
-                window.location = `/user/${response.data.data.id}`
+                window.location = `/home`
             }
         } catch (err) {
             setErrors(err.response.data.errors);
@@ -62,7 +62,7 @@ const LogIn = () => {
                     picture: response.data.data.picture
                 })
 
-                window.location = `/user/${response.data.data.id}`
+                window.location = `/home`
             }
         } catch (err) {
             setErrors(err.response.data.errors);
