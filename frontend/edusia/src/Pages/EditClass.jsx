@@ -1,7 +1,9 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { Link, useParams } from 'react-router-dom'
 import classesAPI from "../API/classes"
 import searchAPI from "../API/search"
+import { MessageContext } from '../Contexts/messageContext';
+import Header from '../Components/Header';
 
 const EditClass = ({currentUser}) => {
     const [classes, setClasses] = useState();
@@ -15,6 +17,7 @@ const EditClass = ({currentUser}) => {
     const [studentsResults, setStudentsResults] = useState([]);
     const [students, setStudents] = useState([]);
     const classID = useParams().id;
+    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,6 +42,7 @@ const EditClass = ({currentUser}) => {
 
     const addClass = async (e) => {
         e.preventDefault();
+        e.target.reset();
 
         try {
             await classesAPI.post(`/${currentUser.id}`, 
@@ -50,7 +54,7 @@ const EditClass = ({currentUser}) => {
                 school_id: currentUser.id
             });
 
-            e.target.reset();
+            displayMessageUpdatedInterval();
         } catch (err) {}
     }
 
@@ -78,6 +82,7 @@ const EditClass = ({currentUser}) => {
         <>
             {loaded &&
                 <>
+                    <Header path={[{text: "Home", link: ""}, {text: `Class ${classes.class_code}`, link: `/class/${classID}`}, "Edit Class"]} />
                     <div className="toolbar">
                         <Link to={`/home/add-student`}>Add Student</Link>
                         <Link to={`/home/add-teacher`}>Add Teacher</Link>
@@ -122,6 +127,7 @@ const EditClass = ({currentUser}) => {
                             </div>
                         )
                     })}
+                    {displayUpdatedMessage && <p>Updated</p>}
                 </>
             }
         </>

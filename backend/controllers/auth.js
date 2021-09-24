@@ -40,33 +40,30 @@ exports.postLogin = async (req, res, next) => {
         let user;
         
         user = await db.query("SELECT * FROM users WHERE email = $1", [req.body.email]);
-
-        if (user.rows.length === 0) {
-            user = await db.query("SELECT * FROM schools WHERE email = $1", [req.body.email]);
-        }
             
-        // if (user) {
-        //     const auth = await bcrypt.compare(req.body.password, user.password);
+        if (user.rows.length === 1) {
+            const auth = await bcrypt.compare(req.body.password, user.password);
     
-        //     if (auth) {
-        //         const token = createToken(user.rows[0].id);
+            if (auth) {
+                const token = createToken(user.rows[0].id);
 
-        //         res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
-        //         res.status(201).json({
-        //             success: true,
-        //             data: user.rows[0]
-        //         })
-        //     }
-        //     throw Error("Incorrect password")
-        // }
-        // throw Error("Incorrect username")
-        const token = createToken(user.rows[0].id);
+                res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
+                res.status(201).json({
+                    success: true,
+                    data: user.rows[0]
+                })
+            }
+            throw Error("Incorrect password")
+        }
+        throw Error("Incorrect username")
 
-        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
-        res.status(201).json({
-            success: true,
-            data: user.rows[0]
-        })
+        // const token = createToken(user.rows[0].id);
+
+        // res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
+        // res.status(201).json({
+        //     success: true,
+        //     data: user.rows[0]
+        // })
 
     } catch (err) {
         console.log(err)

@@ -1,7 +1,9 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { Link, useParams } from 'react-router-dom'
 import usersAPI from "../API/users"
 import imageAPI from "../API/file"
+import { MessageContext } from '../Contexts/messageContext';
+import Header from '../Components/Header';
 
 const EditUser = ({currentUser}) => {
     const [loaded, setLoaded] = useState(false);
@@ -13,6 +15,7 @@ const EditUser = ({currentUser}) => {
     const [pictureName, setPictureName] = useState("");
     const [password, setPassword] = useState("");
     const userID = useParams().id;
+    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -78,6 +81,8 @@ const EditUser = ({currentUser}) => {
                 position: user.position,
                 school_id: user.school_id
             });
+
+            displayMessageUpdatedInterval();
         } catch (err) {}
     }
 
@@ -85,6 +90,7 @@ const EditUser = ({currentUser}) => {
         <>
             {loaded &&
                 <>
+                    <Header path={[{text: "Home", link: ""}, `Edit ${user.name} (${user.username})`]} />
                     <div className="toolbar">
                         <Link to={`/home/add-student`}>Cancel Edit</Link>
                         <Link to={`/home`}>Return Home</Link>
@@ -110,6 +116,7 @@ const EditUser = ({currentUser}) => {
                             <input className="loginButton text4" type="submit" value="Update" />
                         </div>
                     </form>
+                    {displayUpdatedMessage && <p>Updated</p>}
                 </>
             }
         </>

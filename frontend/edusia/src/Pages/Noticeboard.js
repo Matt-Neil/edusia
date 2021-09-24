@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import usersAPI from '../API/users'
+import Header from '../Components/Header';
 
 const Noticeboard = ({currentUser}) => {
     const [notifications, setNotifications] = useState();
@@ -21,25 +22,18 @@ const Noticeboard = ({currentUser}) => {
         fetchData();
     }, [])
 
-    const checkDeadline = (deadline) => {
-        if (deadline > new Date().toISOString()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     return (
         <>
             {loaded &&
-                <div>
+                <>
+                    <Header path={["Noticeboard"]} />
                     <div className="toolbar">
                         <button onClick={() => {setDisplayNotifications(true)}}>Notifications</button>
                         <button onClick={() => {setDisplayNotifications(false)}}>Detentions</button>
                     </div>
                     {displayNotifications ?
                         <>
-                            {notifications && notifications.filter((notificationFilter) => checkDeadline(notificationFilter.deadline)).map((notification, i) => {
+                            {notifications && notifications.filter((notificationFilter) => notificationFilter.deadline > new Date().toISOString()).map((notification, i) => {
                                 return (
                                     <div key={i}>
                                         
@@ -49,7 +43,7 @@ const Noticeboard = ({currentUser}) => {
                         </>
                     :
                         <>
-                            {detentions && detentions.filter((detentionFilter) => checkDeadline(detentionFilter.deadline)).map((detention, i) => {
+                            {detentions && detentions.filter((detentionFilter) => detentionFilter.deadline > new Date().toISOString()).map((detention, i) => {
                                 return (
                                     <div key={i}>
                                         
@@ -58,7 +52,7 @@ const Noticeboard = ({currentUser}) => {
                             })}
                         </>
                     }
-                </div>
+                </>
             }
         </>
     )

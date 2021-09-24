@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-d
 import "./global.css";
 import 'react-datepicker/dist/react-datepicker.css'
 
-import Header from "./Components/Header"
 import Sidebar from "./Components/Sidebar"
 import Home from "./Pages/Home"
 import User from "./Pages/User"
@@ -19,6 +18,8 @@ import EditUser from "./Pages/EditUser"
 import EditClass from "./Pages/EditClass"
 import Test from "./Pages/Test"
 import Student from "./Pages/Student"
+import EditHomework from './Pages/EditHomework';
+import AddHomework from './Pages/AddHomework';
 import { CurrentUserContext } from './Contexts/currentUserContext';
 
 export default function App() {
@@ -51,7 +52,6 @@ export default function App() {
               <div className="wholeBody">
                 <Sidebar currentUser={currentUser} />
                 <div className="mainBody">
-                  <Header currentUser={currentUser} />
                   {currentUser.position === "school" &&
                     <>
                       <Route path="/home/add-student">
@@ -87,6 +87,16 @@ export default function App() {
                       </Route>
                     </>
                   }
+                  {currentUser.position === "teacher" &&
+                    <>
+                      <Route exact path="/edit-homework/:id/:class">
+                        <EditHomework currentUser={currentUser} />
+                      </Route>
+                      <Route exact path="/add-homework/:id">
+                        <AddHomework currentUser={currentUser} />
+                      </Route>
+                    </>
+                  }
                   {currentUser.position === "student" &&
                     <Route exact path="/noticeboard">
                       <Noticeboard currentUser={currentUser} />
@@ -101,11 +111,8 @@ export default function App() {
                   <Route exact path="/home">
                     <Home currentUser={currentUser} />
                   </Route>
-                  <Route exact path="/homework/:id">
+                  <Route exact path="/homework/:id/:class">
                     <Homework currentUser={currentUser} />
-                  </Route>
-                  <Route path="*">
-                    <NotFound />
                   </Route>
                 </div>
               </div>

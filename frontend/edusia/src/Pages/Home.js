@@ -9,6 +9,7 @@ import UserCard from '../Components/UserCard'
 import ClassCard from "../Components/ClassCard"
 import { CompletedContext } from '../Contexts/completedContext';
 import { ExpiredContext } from '../Contexts/expiredContext';
+import Header from "../Components/Header"
 
 const Home = ({currentUser}) => {
     const [homework, setHomework] = useState([]);
@@ -175,6 +176,7 @@ const Home = ({currentUser}) => {
         <>
             {loaded &&
                 <>
+                    <Header path={["Home"]} />
                     {currentUser.position === "student" &&
                         <>
                             <div className="toolbar">

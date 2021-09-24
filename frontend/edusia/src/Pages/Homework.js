@@ -1,18 +1,24 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import homeworkAPI from "../API/homework"
 import fileAPI from "../API/file"
-import { useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
+import { MessageContext } from '../Contexts/messageContext';
+import Header from '../Components/Header';
 const moment = require('moment');
 
 const Homework = ({currentUser}) => {
-    const [expired, setExpired] = useState(true);
+    const [expired, setExpired] = useState(false);
     const [completed, setCompleted] = useState();
     const [homework, setHomework] = useState();
     const [submissions, setSubmissions] = useState();
     const [adjustSubmission, setAdjustSubmission] = useState(false);
     const [submissionFile, setSubmissionFile] = useState("");
     const [loaded, setLoaded] = useState(false);
+    const timeoutID = useRef(null);
     const homeworkID = useParams().id;
+    const classID = useParams().class;
+    const history = useHistory();
+    const {displayAddedMessage, displayMessageAddedInterval} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -37,6 +43,17 @@ const Homework = ({currentUser}) => {
         }
     }, [loaded])
 
+    useEffect(() => {
+        if (loaded && !expired) {
+            timeoutID.current = setTimeout(() => {
+                if (homework.deadline > new Date().toISOString()) {
+                    setExpired(false);
+                }
+            }, 1000)
+            return () => {clearTimeout(timeoutID.current)}
+        }
+    })
+
     const uploadFile = async (e) => {
         e.preventDefault();
 
@@ -55,6 +72,8 @@ const Homework = ({currentUser}) => {
             if (submissions.submission !== "") {
                 await fileAPI.put('/remove', {file: submissions.submission});
             }
+
+            displayMessageAddedInterval();
         } catch (err) {}
     }
 
@@ -101,10 +120,19 @@ const Homework = ({currentUser}) => {
         } catch (err) {}
     }
 
+    const deleteHomework = async () => {
+        try {
+            await homeworkAPI.delete(`/${homeworkID}`)
+
+            history.replace(`/class/${classID}`)
+        } catch (err) {}
+    }
+
     return (
         <>
             {loaded &&
                 <>
+                    <Header path={[{text: "Home", link: ""}, {text: `Class ${homework.class_code}`, link: `/class/${classID}`}, homework.title]} />
                     <div className="toolbar">
                         {currentUser.position === "student" &&
                             <>
@@ -118,8 +146,8 @@ const Homework = ({currentUser}) => {
                         }
                         {currentUser.position === "teacher" &&
                             <>
-                                <button>Edit Homework</button>
-                                <button>Delete Homework</button>
+                                <Link to={`edit-homework/${homeworkID}`}>Edit Homework</Link>
+                                <button onClick={() => {deleteHomework()}}>Delete Homework</button>
                             </>
                         }
                     </div>
@@ -136,17 +164,17 @@ const Homework = ({currentUser}) => {
                             <>
                                 {submissions && submissions.map((submission, i) => {
                                     return (
-                                        <>
+                                        <div key={i}>
                                             {submission.submission !== "" ?
-                                                <div key={i}>
+                                                <div>
                                                     <p>{submission.submission}</p>
                                                 </div>
                                             :
-                                                <div key={i}>
+                                                <div>
                                                     <p>No submission</p>
                                                 </div>
                                             }
-                                        </>
+                                        </div>
                                     )
                                 })}
                             </>
@@ -179,6 +207,7 @@ const Homework = ({currentUser}) => {
                             </>
                         }
                     </div>
+                    {displayAddedMessage && <p>Added</p>}
                 </>
             }
         </>

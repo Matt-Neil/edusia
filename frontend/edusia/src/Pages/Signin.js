@@ -6,9 +6,9 @@ const LogIn = () => {
     const [login, setLogin] = useState(true);
     const [loginEmail, setLoginEmail] = useState("ks3829@email.com");
     const [loginPassword, setLoginPassword] = useState("password");
-    const [name, setName] = useState();
-    const [email, setEmail] = useState();
-    const [password, setPassword] = useState();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [errors, setErrors] = useState({email: undefined, password: undefined});
     const {changeCurrentUser} = useContext(CurrentUserContext);
 

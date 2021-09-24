@@ -1,7 +1,9 @@
-import React, {useState} from 'react'
+import React, {useState, useContext} from 'react'
 import { Link } from 'react-router-dom'
 import classesAPI from "../API/classes"
 import searchAPI from "../API/search"
+import { MessageContext } from '../Contexts/messageContext';
+import Header from '../Components/Header';
 
 const AddClass = ({currentUser}) => {
     const [teacher_id, setTeacher_id] = useState("");
@@ -12,6 +14,7 @@ const AddClass = ({currentUser}) => {
     const [teachersResults, setTeachersResults] = useState([]);
     const [studentsResults, setStudentsResults] = useState([]);
     const [students, setStudents] = useState([]);
+    const {displayAddedMessage, displayMessageAddedInterval} = useContext(MessageContext);
 
     const addClass = async (e) => {
         e.preventDefault();
@@ -35,7 +38,7 @@ const AddClass = ({currentUser}) => {
             setSearchTeacher("");
             setTeachersResults([]);
             setStudentsResults([]);
-            
+            displayMessageAddedInterval();
         } catch (err) {}
     }
 
@@ -61,6 +64,7 @@ const AddClass = ({currentUser}) => {
 
     return (
         <>
+            <Header path={[{text: "Home", link: ""}, "Add Class"]} />
             <div className="toolbar">
                 <Link to={`/home/add-student`}>Add Student</Link>
                 <Link to={`/home/add-teacher`}>Add Teacher</Link>
@@ -105,6 +109,7 @@ const AddClass = ({currentUser}) => {
                     </div>
                 )
             })}
+            {displayAddedMessage && <p>Added</p>}
         </>
     )
 }

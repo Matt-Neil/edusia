@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Calendar = () => {
+const MessageCard = () => {
     return (
         <div>
             
@@ -8,4 +8,4 @@ const Calendar = () => {
     )
 }
 
-export default Calendar
+export default MessageCard

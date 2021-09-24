@@ -1,20 +1,9 @@
 const db = require('../db');
-// const handleErrors = (err) => {
-//     let errors = { rating: "", title: "", servings: "", description: "", difficulty: "", meal: "" };
-
-//     if (err.message.includes('Recipe validation failed')) {
-//         Object.values(err.errors).forEach(({properties}) => {
-//             errors[properties.path] = properties.message;
-//         })
-//     }
-
-//     return errors;
-// }
 
 exports.getLesson = async (req, res, next) => {
     try {
-        const lesson = await db.query("SELECT classes.subject, classes.class_code, users.name, users.picture, users.email, users.username FROM classes INNER JOIN users ON classes.id = $1 AND (classes.school_id = $2 OR classes.teacher_id = $2) AND users.id = classes.teacher_id", 
-            [req.params.id, res.locals.currentUser.id]);
+        const lesson = await db.query("SELECT classes.subject, classes.class_code, users.name, users.picture, users.username FROM classes INNER JOIN users ON classes.id = $1 AND (classes.school_id = $2 OR classes.school_id = £3) AND users.id = classes.teacher_id", 
+            [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id]);
         
         res.status(201).json({
             success: true,
@@ -30,7 +19,8 @@ exports.getLesson = async (req, res, next) => {
 
 exports.getLessonsTeacher = async (req, res, next) => {
     try {
-        const lessons = await db.query("SELECT subject, class_code, id FROM classes WHERE teacher_id = $1", [req.params.id]);
+        const lessons = await db.query("SELECT subject, class_code, id FROM classes WHERE teacher_id = $1 AND school_id = $2", 
+            [req.params.id, res.locals.currentUser.school_id]);
         
         res.status(201).json({
             success: true,
@@ -46,7 +36,8 @@ exports.getLessonsTeacher = async (req, res, next) => {
 
 exports.getLessonsSchool = async (req, res, next) => {
     try {
-        const lessons = await db.query("SELECT subject, class_code, id FROM classes WHERE school_id = $1", [req.params.id]);
+        const lessons = await db.query("SELECT subject, class_code, id FROM classes WHERE school_id = $1 AND $1 = $2",
+            [req.params.id, res.locals.currentUser.id]);
         
         res.status(201).json({
             success: true,

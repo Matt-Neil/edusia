@@ -1,19 +1,20 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { useParams, useHistory } from 'react-router';
 import usersAPI from "../API/users"
 import DatePicker from 'react-datepicker'
-const moment = require('moment');
+import { MessageContext } from '../Contexts/messageContext';
+import Header from '../Components/Header';
 
 const Student = ({currentUser}) => {
     const [loaded, setLoaded] = useState(false);
     const [student, setStudent] = useState();
-    const [notes, setNotes] = useState();
+    const [notes, setNotes] = useState([]);
     const [addNote, setAddNote] = useState("");
-    const [updateNotes, setUpdateNotes] = useState();
-    const [updateDetentions, setUpdateDetentions] = useState();
-    const [detentions, setDetentions] = useState();
-    const [editNotes, setEditNotes] = useState();
-    const [editDetentions, setEditDetentions] = useState();
+    const [updateNotes, setUpdateNotes] = useState([]);
+    const [updateDetentions, setUpdateDetentions] = useState([]);
+    const [detentions, setDetentions] = useState([]);
+    const [editNotes, setEditNotes] = useState([]);
+    const [editDetentions, setEditDetentions] = useState([]);
     const [finishedDetentions, setFinishedDetentions] = useState(false);
     const [finishedNotes, setFinishedNotes] = useState(false);
     const [displayNotes, setDisplayNotes] = useState(true);
@@ -21,6 +22,8 @@ const Student = ({currentUser}) => {
     const [detentionLocation, setDetentionLocation] = useState("");
     const [detentionReason, setDetentionReason] = useState("");
     const [pickerDate, setPickerDate] = useState(new Date());
+    const {displayAddedMessage, displayUpdatedMessage, displayDeletedMessage, 
+        displayMessageAddedInterval, displayMessageUpdatedInterval, displayMessageDeletedInterval} = useContext(MessageContext);
     const studentID = useParams().id;
     const classID = useParams().class;
     const history = useHistory();
@@ -101,12 +104,26 @@ const Student = ({currentUser}) => {
         e.preventDefault();
 
         try {
-            await usersAPI.post(`/student/${studentID}/lesson/notes?class=${classID}`, {
+            const newNote = await usersAPI.post(`/student/${studentID}/lesson/notes?class=${classID}`, {
                 class_id: classID,
                 student_id: studentID,
                 note: addNote,
                 created: new Date().toISOString()
             })
+
+            const noteObject = {
+                id: newNote.data.data.id,
+                class_id: classID,
+                student_id: studentID,
+                note: addNote,
+                created: newNote.data.data.created
+            }
+
+            setNotes(notePrevious => [noteObject, ...notePrevious]);
+            setUpdateNotes(notePrevious => [noteObject, ...notePrevious]);
+            setEditNotes(notesPrevious => [false, ...notesPrevious]);
+            setAddNote("");
+            displayMessageAddedInterval();
         } catch (err) {}
     }
 
@@ -127,16 +144,20 @@ const Student = ({currentUser}) => {
                         id: notes[i].id
                     }}));
                     setEditNotes(previousState => Object.assign([], previousState, {[i]: false}))
+                    displayMessageUpdatedInterval();
                 } catch (err) {}
             }
         }
     }
 
-    const deleteNote = async (id) => {
+    const deleteNote = async (id, index) => {
         try {
-            await usersAPI.delete(`/student/${studentID}/lesson/notes?class=${classID}`, {
-                id: id
-            })
+            await usersAPI.delete(`/student/${studentID}/lesson/notes?class=${classID}&note=${id}`)
+
+            setNotes(notes.filter(note => note.id !== id));
+            setUpdateNotes(updateNotes.filter(note => note.id !== id));
+            setEditNotes(editNotes.filter((edit, i) => i !== index));
+            displayMessageDeletedInterval();
         } catch (err) {}
     }
 
@@ -144,18 +165,31 @@ const Student = ({currentUser}) => {
         e.preventDefault();
 
         try {
-            await usersAPI.post(`/student/${studentID}/lesson/detentions?class=${classID}`, {
+            const newDetention = await usersAPI.post(`/student/${studentID}/lesson/detentions?class=${classID}`, {
                 class_id: classID,
                 student_id: studentID,
                 location: detentionLocation,
                 date: detentionDate,
                 reason: detentionReason
             })
+
+            const detentionObject = {
+                class_id: classID,
+                student_id: studentID,
+                id: newDetention.data.data.id,
+                location: detentionLocation,
+                date: detentionDate,
+                reason: detentionReason
+            }
             
+            setDetentions(detentionsPrevious => [detentionObject, ...detentionsPrevious]);
+            setUpdateDetentions(notificationsPrevious => [detentionObject, ...notificationsPrevious]);
+            setEditDetentions(detentionsPrevious => [false, ...detentionsPrevious]);
             setPickerDate(new Date());
             setDetentionLocation("");
             setDetentionDate("");
             setDetentionReason("");
+            displayMessageAddedInterval();
         } catch (err) {}
     }
 
@@ -177,16 +211,20 @@ const Student = ({currentUser}) => {
 
                     setDetentions(previousState => Object.assign([], previousState, {[i]: updatedDetention}));
                     setEditDetentions(previousState => Object.assign([], previousState, {[i]: false}))
+                    displayMessageUpdatedInterval();
                 } catch (err) {}
             }
         }
     }
 
-    const deleteDetention = async (id) => {
+    const deleteDetention = async (id, index) => {
         try {
-            await usersAPI.delete(`/student/${studentID}/lesson/detentions?class=${classID}`, {
-                id: id
-            })
+            await usersAPI.delete(`/student/${studentID}/lesson/detentions?class=${classID}&detention=${id}`)
+
+            setDetentions(detentions.filter(detention => detention.id !== id));
+            setUpdateDetentions(updateDetentions.filter(detention => detention.id !== id));
+            setEditDetentions(editDetentions.filter((edit, i) => i !== index));
+            displayMessageDeletedInterval();
         } catch (err) {}
     }
 
@@ -194,6 +232,7 @@ const Student = ({currentUser}) => {
         <>
             {loaded &&
                 <>
+                    <Header path={[{text: "Home", link: ""}, {text: `Class ${student.class_code}`, link: `/class/${classID}`}, `${student.name} (${student.username})`]} />
                     <div className="toolbar">
                         <button onClick={() => {setDisplayNotes(true)}}>Notes</button>
                         <button onClick={() => {setDisplayNotes(false)}}>Detentions</button>
@@ -227,7 +266,7 @@ const Student = ({currentUser}) => {
                                             <>
                                                 <p>{note.note}</p>
                                                 <button onClick={() => {setEditNotes(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
-                                                <button onClick={() => {deleteNote(note.id)}}>Delete</button>
+                                                <button onClick={() => {deleteNote(note.id, i)}}>Delete</button>
                                             </>
                                         }
                                     </div>
@@ -311,51 +350,51 @@ const Student = ({currentUser}) => {
                                                             reason: e.target.value
                                                         }}))}} />
                                                         <DatePicker renderCustomHeader={({
-                                                                monthDate,
-                                                                customHeaderCount,
-                                                                decreaseMonth,
-                                                                increaseMonth,
-                                                            }) => (
-                                                                <div>
-                                                                    <button aria-label="Previous Month"
-                                                                            type="button"
-                                                                            className={"react-datepicker__navigation react-datepicker__navigation--previous"}
-                                                                            style={customHeaderCount === 1 ? { visibility: "hidden" } : null}
-                                                                            onClick={decreaseMonth}>
-                                                                        <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"}>
-                                                                            {"<"}
-                                                                        </span>
-                                                                    </button>
-                                                                    <span className="react-datepicker__current-month">
-                                                                        {monthDate.toLocaleString("en-GB", {
-                                                                            month: "long",
-                                                                            year: "numeric",
-                                                                        })}
-                                                                    </span>
-                                                                    <button aria-label="Next Month"
-                                                                            type="button"
-                                                                            className={"react-datepicker__navigation react-datepicker__navigation--next"}
-                                                                            style={customHeaderCount === 0 ? { visibility: "hidden" } : null}
-                                                                            onClick={increaseMonth}>
-                                                                        <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--next"}>
-                                                                            {">"}
-                                                                        </span>
-                                                                    </button>
-                                                                </div>
-                                                            )}
-                                                            monthsShown={2}
-                                                            selected={new Date(updateDetentions[i].date)} 
-                                                            onChange={date => {setUpdateDetentions(previousState => Object.assign([], previousState, {[i]: {
-                                                                id: previousState[i].id,
-                                                                date: new Date(date).toISOString(),
-                                                                location: previousState[i].location,
-                                                                reason: previousState[i].reason
-                                                            }}))}} 
-                                                            dateFormat="dd/MM/yyyy"
-                                                            minDate={new Date()} 
-                                                            filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
-                                                            inline
-                                                            placeholderText={"Select Date"} />
+                                                                        monthDate,
+                                                                        customHeaderCount,
+                                                                        decreaseMonth,
+                                                                        increaseMonth,
+                                                                    }) => (
+                                                                        <div>
+                                                                            <button aria-label="Previous Month"
+                                                                                    type="button"
+                                                                                    className={"react-datepicker__navigation react-datepicker__navigation--previous"}
+                                                                                    style={customHeaderCount === 1 ? { visibility: "hidden" } : null}
+                                                                                    onClick={decreaseMonth}>
+                                                                                <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"}>
+                                                                                    {"<"}
+                                                                                </span>
+                                                                            </button>
+                                                                            <span className="react-datepicker__current-month">
+                                                                                {monthDate.toLocaleString("en-GB", {
+                                                                                    month: "long",
+                                                                                    year: "numeric",
+                                                                                })}
+                                                                            </span>
+                                                                            <button aria-label="Next Month"
+                                                                                    type="button"
+                                                                                    className={"react-datepicker__navigation react-datepicker__navigation--next"}
+                                                                                    style={customHeaderCount === 0 ? { visibility: "hidden" } : null}
+                                                                                    onClick={increaseMonth}>
+                                                                                <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--next"}>
+                                                                                    {">"}
+                                                                                </span>
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
+                                                                    monthsShown={2}
+                                                                    selected={new Date(updateDetentions[i].date)} 
+                                                                    onChange={date => {setUpdateDetentions(previousState => Object.assign([], previousState, {[i]: {
+                                                                        id: previousState[i].id,
+                                                                        date: new Date(date).toISOString(),
+                                                                        location: previousState[i].location,
+                                                                        reason: previousState[i].reason
+                                                                    }}))}} 
+                                                                    dateFormat="dd/MM/yyyy"
+                                                                    minDate={new Date()} 
+                                                                    filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
+                                                                    inline
+                                                                    placeholderText={"Select Date"} />
                                                     </div>
                                                     <div className="formSubmit">
                                                         <input className="loginButton text4" type="submit" value="Update Detention" />
@@ -367,7 +406,7 @@ const Student = ({currentUser}) => {
                                             <>
                                                 <p>{detention.reason}</p>
                                                 <button onClick={() => {setEditDetentions(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
-                                                <button onClick={() => {deleteDetention(detention.id)}}>Delete</button>
+                                                <button onClick={() => {deleteDetention(detention.id, i)}}>Delete</button>
                                             </>
                                         }
                                     </div>
@@ -380,6 +419,9 @@ const Student = ({currentUser}) => {
                             </div>
                         </>
                     }
+                    {displayAddedMessage && <p>Added</p>}
+                    {displayUpdatedMessage && <p>Updated</p>}
+                    {displayDeletedMessage && <p>Deleted</p>}
                 </>
             }
         </>

@@ -1,6 +1,8 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import usersAPI from "../API/users"
 import fileAPI from "../API/file"
+import { MessageContext } from '../Contexts/messageContext';
+import Header from '../Components/Header';
 
 const Settings = () => {
     const [user, setUser] = useState();
@@ -8,6 +10,7 @@ const Settings = () => {
     const [pictureName, setPictureName] = useState("");
     const [password, setPassword] = useState("");
     const [loaded, setLoaded] = useState(false);
+    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -37,6 +40,10 @@ const Settings = () => {
             const uploadResponse = await fileAPI.post("/upload", formData);
 
             setPictureName(uploadResponse.data.data);
+
+            if (pictureName !== "") {
+                await fileAPI.put('/remove', {file: pictureName});
+            }
         } catch (err) {}
     }
 
@@ -44,6 +51,7 @@ const Settings = () => {
         try {
             if (pictureFile !== "" && pictureName !== "default.png") {
                 const temp = pictureName;
+                
                 setPictureFile("");
                 setPictureName(user.picture);
 
@@ -73,11 +81,13 @@ const Settings = () => {
 
             setPassword("");
             setPictureName(user.picture);
+            displayMessageUpdatedInterval();
         } catch (err) {}
     }
 
     return (
-        <div>
+        <>
+            <Header path={["Settings"]} />
             <img src={`http://localhost:5000/uploads/${pictureName}`} className="img4" alt="User Avatar" />
             <form method="POST" onSubmit={uploadPicture} encType="multipart/form-data">
                 <div>
@@ -96,7 +106,8 @@ const Settings = () => {
                     <input className="loginButton text4" type="submit" value={"Update Account"} />
                 </div>
             </form>
-        </div>
+            {displayUpdatedMessage && <p>Updated</p>}
+        </>
     )
 }
 

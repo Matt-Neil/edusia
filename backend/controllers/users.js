@@ -1,30 +1,16 @@
 const db = require('../db');
 const bcrypt = require('bcrypt');
-// const handleErrors = (err) => {
-//     let errors = { email: "", password: "", name: "" };
-
-//     if (err.code === 11000) {
-//         errors.email = 'That email has already been registered';
-//         return errors;
-//     }
-
-//     if (err.message.includes('User validation failed')) {
-//         Object.values(err.errors).forEach(({properties}) => {
-//             errors[properties.path] = properties.message;
-//         })
-//     }
-
-//     return errors;
-// }
 
 exports.getSettings = async (req, res, next) => {
     try {
         let user;
 
         if (res.locals.currentUser.position !== "school") {
-            user = await db.query("SELECT picture, password FROM users WHERE id = $1", [res.locals.currentUser.id]);
+            user = await db.query("SELECT picture, password FROM users WHERE id = $1", 
+                [res.locals.currentUser.id, res.locals.currentUser.school_id]);
         } else {
-            user = await db.query("SELECT picture, password FROM schools WHERE id = $1", [res.locals.currentUser.id]);
+            user = await db.query("SELECT picture, password FROM schools WHERE id = $1", 
+                [res.locals.currentUser.id]);
         }
 
         res.status(201).json({
@@ -45,9 +31,11 @@ exports.putSettings = async (req, res, next) => {
         const hashedPassword = await bcrypt.hash(req.body.password.toString(), 10);
 
         if (res.locals.currentUser.position !== "school") {
-            await db.query("UPDATE users SET picture = $1, password = $2 WHERE id = $3", [req.body.picture, hashedPassword, res.locals.currentUser.id]);
+            await db.query("UPDATE users SET picture = $1, password = $2 WHERE id = $3", 
+                [req.body.picture, hashedPassword, res.locals.currentUser.id]);
         } else {
-            await db.query("UPDATE schools SET picture = $1, password = $2 WHERE id = $3", [req.body.picture, hashedPassword, res.locals.currentUser.id]);
+            await db.query("UPDATE schools SET picture = $1, password = $2 WHERE id = $3", 
+                [req.body.picture, hashedPassword, res.locals.currentUser.id]);
         }
 
         res.status(201).json({
@@ -64,7 +52,8 @@ exports.putSettings = async (req, res, next) => {
 
 exports.getDetentions = async (req, res, next) => {
     try {
-        const detentions = await db.query("SELECT classes.subject, classes.class_code, detentions.duration, detentions.location, detentions.date FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1", [res.locals.currentUser.id]);
+        const detentions = await db.query("SELECT classes.subject, classes.class_code, detentions.duration, detentions.location, detentions.date FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND classes.school_id = $2", 
+            [res.locals.currentUser.id, res.locals.currentUser.school_id]);
 
         res.status(201).json({
             success: true,
@@ -81,7 +70,8 @@ exports.getDetentions = async (req, res, next) => {
 
 exports.getNotifications = async (req, res, next) => {
     try {
-        const notifications = await db.query("SELECT classes.subject, classes.class_code, notifications.notification, notifications.expire FROM notifications INNER JOIN classes ON notifications.class_id = classes.id INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = classes.id", [res.locals.currentUser.id]);
+        const notifications = await db.query("SELECT classes.subject, classes.class_code, notifications.notification, notifications.expire FROM notifications INNER JOIN classes ON notifications.class_id = classes.id INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = classes.id AND classes.school_id = $2", 
+            [res.locals.currentUser.id, res.locals.currentUser.school_id]);
 
         res.status(201).json({
             success: true,
@@ -129,10 +119,8 @@ exports.getStudentDetentions = async (req, res, next) => {
                 [req.params.id, req.query.class, res.locals.currentUser.school_id, req.query.date]);
         } else {
             detentions = await db.query("SELECT detentions.location, detentions.date, detentions.reason, detentions.id FROM detentions LEFT JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND detentions.class_id = $2 AND classes.school_id = $3 AND detentions.date < $4 ORDER BY detentions.date DESC LIMIT 10",
-                [req.params.id, req.query.class, res.locals.currentUser.school_id, req.query.date]);
+                [req.params.id, req.query.class, res.locals.currentUser.id, req.query.date]);
         }
-
-        console.log(detentions.rows)
         
         res.status(201).json({
             success: true,
@@ -148,11 +136,12 @@ exports.getStudentDetentions = async (req, res, next) => {
 
 exports.postStudentDetentions = async (req, res, next) => {
     try {
-        await db.query("INSERT INTO detentions (class_id, student_id, location, date, reason) VALUES ($1, $2, $3, $4, $5, $6) returning *",
+        const detention = await db.query("INSERT INTO detentions (class_id, student_id, location, date, reason) VALUES ($1, $2, $3, $4, $5, $6) returning *",
                 [req.body.class_id, req.body.student_id, req.body.duration, req.body.location, req.body.date, req.body.reason]);
         
         res.status(201).json({
-            success: true
+            success: true,
+            data: detention.rows[0]
         })
     } catch (err) {
         console.log(err)
@@ -181,19 +170,11 @@ exports.putStudentDetentions = async (req, res, next) => {
 
 exports.deleteStudentDetentions = async (req, res, next) => {
     try {
-        let detentions;
-
-        if (res.locals.currentUser.position === "teacher") {
-            detentions = await db.query("SELECT detentions.duration, detentions.location, detentions.date, detentions.reason, detentions.id FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND detentions.class_id = $2 AND classes.school_id = $3 AND detentions.date < $4 ORDER BY detentions.date DESC LIMIT 10",
-                [req.params.id, req.query.class, res.locals.currentUser.school_id, req.query.date]);
-        } else {
-            detentions = await db.query("SELECT detentions.duration, detentions.location, detentions.date, detentions.reason, detentions.id FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND detentions.class_id = $2 AND classes.school_id = $3 AND detentions.date < $4 ORDER BY detentions.date DESC LIMIT 10",
-                [req.params.id, req.query.class, res.locals.currentUser.school_id, req.query.date]);
-        }
+        await db.query("DELETE FROM detentions WHERE id = $1",
+            [req.query.detention]);
         
         res.status(201).json({
-            success: true,
-            data: detentions.rows
+            success: true
         })
     } catch (err) {
         res.status(500).json({
@@ -229,11 +210,12 @@ exports.getStudentNotes = async (req, res, next) => {
 
 exports.postStudentNotes = async (req, res, next) => {
     try {
-        await db.query("INSERT INTO notes (class_id, student_id, note, created) VALUES ($1, $2, $3, $4) returning *",
+        const note = await db.query("INSERT INTO notes (class_id, student_id, note, created) VALUES ($1, $2, $3, $4) returning *",
                 [req.body.class_id, req.body.student_id, req.body.note, req.body.created]);
         
         res.status(201).json({
-            success: true
+            success: true,
+            data: note.rows[0]
         })
     } catch (err) {
         res.status(500).json({
@@ -261,9 +243,8 @@ exports.putStudentNotes = async (req, res, next) => {
 
 exports.deleteStudentNotes = async (req, res, next) => {
     try {
-        console.log(req.body.note_id)
         await db.query("DELETE FROM notes WHERE id = $1",
-            [req.body.id]);
+            [req.query.note]);
         
         res.status(201).json({
             success: true
@@ -281,10 +262,10 @@ exports.getStudentsLesson = async (req, res, next) => {
         let students;
 
         if (res.locals.currentUser.position === "teacher") {
-            students = await db.query("SELECT users.name, users.picture, users.username, users.id FROM users INNER JOIN students_classes ON students_classes.class_id = $1 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $1 AND (classes.teacher_id = $2 OR classes.school_id = $2)",
-                [req.params.id, res.locals.currentUser.id]);
+            students = await db.query("SELECT users.name, users.picture, users.username, users.id FROM users INNER JOIN students_classes ON students_classes.class_id = $1 AND students_classes.student_id = users.id AND users.school_id = $2",
+                [req.params.id, res.locals.currentUser.school_id]);
         } else {
-            students = await db.query("SELECT users.name, users.picture, users.username, users.id FROM users INNER JOIN students_classes ON students_classes.class_id = $1 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $1 AND (classes.teacher_id = $2 OR classes.school_id = $2)",
+            students = await db.query("SELECT users.name, users.picture, users.username, users.id FROM users INNER JOIN students_classes ON students_classes.class_id = $1 AND students_classes.student_id = users.id AND users.school_id = $2)",
                 [req.params.id, res.locals.currentUser.id]);
         }
         
@@ -305,9 +286,11 @@ exports.getStudentsSchool = async (req, res, next) => {
         let students;
 
         if (req.query.id === undefined) {
-            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' ORDER BY id ASC LIMIT 10", [req.params.id]);
+            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' ORDER BY id ASC LIMIT 10", 
+                [req.params.id]);
         } else {
-            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' AND id > $2 ORDER BY id ASC LIMIT 10", [req.params.id, req.query.id]);
+            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' AND id > $2 ORDER BY id ASC LIMIT 10", 
+                [req.params.id, req.query.id]);
         }
 
         res.status(201).json({
@@ -327,9 +310,11 @@ exports.getTeachersSchool = async (req, res, next) => {
         let teachers;
 
         if (req.query.id === undefined) {
-            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' ORDER BY id ASC LIMIT 10", [req.params.id]);
+            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' ORDER BY id ASC LIMIT 10", 
+                [req.params.id]);
         } else {
-            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' AND id > $2 ORDER BY id ASC LIMIT 10", [req.params.id, req.query.id]);
+            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' AND id > $2 ORDER BY id ASC LIMIT 10", 
+                [req.params.id, req.query.id]);
         }
 
         res.status(201).json({

@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { useParams, useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
 import usersAPI from "../API/users"
+import Header from '../Components/Header';
 
 const User = ({currentUser}) => {
     const [loaded, setLoaded] = useState(false);
@@ -28,7 +29,8 @@ const User = ({currentUser}) => {
     return (
         <>
             {loaded &&
-                <>
+                <>  
+                    <Header path={[{text: "Home", link: ""}, `${user.name} (${user.username})`]} />
                     {currentUser.position === "school" &&
                         <>
                             {user.user.position === "teacher" ?

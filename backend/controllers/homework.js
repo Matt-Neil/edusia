@@ -1,25 +1,15 @@
 const db = require('../db');
-// const handleErrors = (err) => {
-//     let errors = { rating: "", title: "", servings: "", description: "", difficulty: "", meal: "" };
-
-//     if (err.message.includes('Recipe validation failed')) {
-//         Object.values(err.errors).forEach(({properties}) => {
-//             errors[properties.path] = properties.message;
-//         })
-//     }
-
-//     return errors;
-// }
 
 exports.getHomework = async (req, res, next) => {
     try {
         let homework;
 
         if (res.locals.currentUser !== "student") {
-            homework = await db.query("SELECT * FROM homework WHERE id = $1", [req.params.id])
+            homework = await db.query("SELECT homework.class_id, homework.title, homework.description, homework.deadline, homework.file, classes.class_code FROM homework INNER JOIN classes ON homework.id = $1 AND homework.class_id = classes.id AND (classes.school_id = $2 OR classes.school_id = $3)", 
+                [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id])
         } else {
-            homework = await db.query("SELECT homework.id, homework.teacher, homework.class_id, homework.title, homework.description, homework.deadline, homework.file, students_homework.completed, students_homework.submission FROM homework INNER JOIN students_homework ON homework.id = $1 AND homework.id = students_homework.homework_id AND students_homework.students_id = $2",
-                [res.locals.currentUser.id])
+            homework = await db.query("SELECT homework.class_id, homework.title, homework.description, homework.deadline, homework.file, students_homework.completed, students_homework.submission, classes.class_code FROM homework INNER JOIN students_homework ON homework.id = $1 AND homework.id = students_homework.homework_id AND students_homework.student_id = $2 INNER JOIN classes ON homework.class_id = classes.id AND classes.school_id = $3",
+                [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id])
         }
 
         res.status(201).json({
@@ -36,8 +26,8 @@ exports.getHomework = async (req, res, next) => {
 
 exports.getHomeworkStudent = async (req, res, next) => {
     try {
-        const homework = await db.query("SELECT classes.class_code, homework.class_id, students_homework.completed, homework.deadline, students_homework.homework_id, classes.subject, homework.title FROM students_homework INNER JOIN homework ON students_homework.student_id = $1 AND homework.id = students_homework.homework_id AND homework.deadline > $2 INNER JOIN classes ON classes.id = homework.class_id ORDER BY homework.deadline ASC LIMIT 10",
-            [res.locals.currentUser.id, new Date(req.query.date)]);
+        const homework = await db.query("SELECT homework.id, classes.class_code, homework.class_id, students_homework.completed, homework.deadline, students_homework.homework_id, classes.subject, homework.title FROM students_homework INNER JOIN homework ON students_homework.student_id = $1 AND homework.id = students_homework.homework_id AND homework.deadline > $2 INNER JOIN classes ON classes.id = homework.class_id AND classes.school_id = $3 ORDER BY homework.deadline ASC LIMIT 10",
+            [res.locals.currentUser.id, new Date(req.query.date), res.locals.currentUser.school_id]);
 
         res.status(201).json({
             success: true,
@@ -54,8 +44,8 @@ exports.getHomeworkStudent = async (req, res, next) => {
 
 exports.getHomeworkClass = async (req, res, next) => {
     try {
-        const homework = await db.query("SELECT homework.id, homework.title, homework.deadline FROM homework INNER JOIN classes ON homework.class_id = $1 AND homework.class_id = classes.id AND (classes.teacher_id = $2 OR classes.school_id = $2) AND homework.deadline > $2 ORDER BY homework.deadline ASC LIMIT 10",
-            [req.params.id, res.locals.currentUser.id, new Date(req.query.date)])
+        const homework = await db.query("SELECT homework.id, homework.title, homework.deadline FROM homework INNER JOIN classes ON homework.class_id = $1 AND homework.class_id = classes.id AND (classes.school_id = $2 OR classes.school_id = $3) AND homework.deadline > $4 ORDER BY homework.deadline ASC LIMIT 10",
+            [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id, new Date(req.query.date)])
 
         res.status(201).json({
             success: true,
@@ -70,22 +60,19 @@ exports.getHomeworkClass = async (req, res, next) => {
     }
 }
 
-exports.addHomework = async (req, res, next) => {
+exports.postHomework = async (req, res, next) => {
     try {
-        // if (res.locals.currentUser.position === "teacher") {
-        //     await Homework.create(req.body);
+        const homework = await db.query("INSERT INTO homework (teacher_id, class_id, title, description, deadline, file) VALUES ($1, $2, $3, $4, $5, $6) returning *",
+            [req.body.teacher_id, req.body.class_id, req.body.title, req.body.description, req.body.deadline, req.body.file])
 
-        //     res.status(201).json({
-        //         success: true
-        //     })
-        // }
-        const hwk = await Homework.create(req.body);
+        {req.body.students.map(async (student) => {
+            await db.query("INSERT INTO students_homework (student_id, homework_id, completed, submission) VALUES ($1, $2, $3, $4) returning *",
+                [student.id, homework.rows[0].id, false, ''])
+        })}
 
-        console.log(hwk)
-
-            res.status(201).json({
-                success: true
-            })
+        res.status(201).json({
+            success: true
+        })
     } catch (err) {
         const errors = handleErrors(err);
         res.status(400).json({
@@ -97,31 +84,12 @@ exports.addHomework = async (req, res, next) => {
 
 exports.updateHomework = async (req, res, next) => {
     try {
-        if (res.locals.currentUser.position === "teacher") {
-            const { title, description, deadline, file } = req.body;
-            const homework = await Homework.findById(req.params.id);
-            
-            if (!homework) {
-                res.status(404).json({
-                    success: false,
-                    error: "No Homework Found."
-                })
-            } else {
-                homework.title = title;
-                homework.description = description;
-                homework.deadline = deadline;
-                homework.file = file;
-                homework.teacher = homework.teacher;
-                homework.students = homework.students;
-                homework.class = homework.class;
-    
-                await homework.save();
-    
-                res.status(201).json({
-                    success: true
-                })
-            }
-        }
+        await db.query("UPDATE homework SET title = $1, description = $2, deadline = $3, file = $4 WHERE id = $5 returning *",
+            [req.body.title, req.body.description, req.body.deadline, req.body.file, req.params.id])
+
+        res.status(201).json({
+            success: true
+        })
     } catch (err) {
         const errors = handleErrors(err);
         res.status(400).json({
@@ -133,22 +101,11 @@ exports.updateHomework = async (req, res, next) => {
 
 exports.deleteHomework = async (req, res, next) => {
     try {
-        if (res.locals.currentUser.position === "teacher") {
-            const homework = await Homework.findById(req.params.id);
-
-            if (!homework) {
-                res.status(404).json({
-                    success: false,
-                    error: "No Recipe Found."
-                })
-            } else {
-                await homework.remove();
-
-                res.status(201).json({
-                    success: true
-                })
-            }
-        }
+        await db.query("DELETE FROM homework WHERE id = $1", [req.params.id])
+        
+        res.status(201).json({
+            success: true
+        })
     } catch (err) {
         res.status(500).json({
             success: false,
@@ -178,16 +135,16 @@ exports.getSubmissions = async (req, res, next) => {
         let submissions;
 
         if (res.locals.currentUser.position === "student") {
-            submissions = await db.query("SELECT students_homework.submission, students_homework.completed FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND students_homework.student_id = users.id AND students_homework.student_id = $2",
-                [req.params.id, res.locals.currentUser.id]);
+            submissions = await db.query("SELECT students_homework.submission, students_homework.completed FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND students_homework.student_id = users.id AND students_homework.student_id = $2 AND users.school_id = $3",
+                [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id]);
 
             res.status(201).json({
                 success: true,
                 data: submissions.rows[0]
             })
         } else {
-            submissions = await db.query("SELECT students_homework.submission, users.id, users.name, users.username FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND users.id = students_homework.student_id",
-                [req.params.id]);
+            submissions = await db.query("SELECT students_homework.submission, users.id, user.picture, users.name, users.username FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND users.id = students_homework.student_id AND (users.school_id = $2 OR users.school_id = $3)",
+                [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id]);
             
             res.status(201).json({
                 success: true,

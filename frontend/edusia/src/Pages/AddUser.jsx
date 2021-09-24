@@ -1,7 +1,9 @@
-import React, {useState} from 'react'
+import React, {useState, useContext} from 'react'
 import { Link } from 'react-router-dom'
 import usersAPI from "../API/users"
 import fileAPI from "../API/file"
+import { MessageContext } from '../Contexts/messageContext';
+import Header from '../Components/Header';
 
 const AddUser = ({currentUser, position}) => {
     const [name, setName] = useState("");
@@ -10,6 +12,7 @@ const AddUser = ({currentUser, position}) => {
     const [pictureFile, setPictureFile] = useState("");
     const [pictureName, setPictureName] = useState("default.png");
     const [password, setPassword] = useState();
+    const {displayAddedMessage, displayMessageAddedInterval} = useContext(MessageContext);
 
     const uploadPicture = async (e) => {
         e.preventDefault();
@@ -58,12 +61,13 @@ const AddUser = ({currentUser, position}) => {
             setPassword("");
             setPictureFile("");
             setPictureName("default.png");
-
+            displayMessageAddedInterval();
         } catch (err) {}
     }
 
     return (
         <>
+            <Header path={[{text: "Home", link: ""}, "Add User"]} />
             <div className="toolbar">
                 <Link to={`/home/add-student`}>Add Student</Link>
                 <Link to={`/home/add-teacher`}>Add Teacher</Link>
@@ -91,6 +95,7 @@ const AddUser = ({currentUser, position}) => {
                     <input className="loginButton text4" type="submit" value={"Add User"} />
                 </div>
             </form>
+            {displayAddedMessage && <p>Added</p>}
         </>
     )
 }
