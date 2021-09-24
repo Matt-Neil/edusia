@@ -12,7 +12,7 @@ const AddUser = ({currentUser, position}) => {
     const [pictureFile, setPictureFile] = useState("");
     const [pictureName, setPictureName] = useState("default.png");
     const [password, setPassword] = useState();
-    const {displayAddedMessage, displayMessageAddedInterval} = useContext(MessageContext);
+    const {displayAddedMessage, displayMessageAddedInterval, displayErrorMessage, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     const uploadPicture = async (e) => {
         e.preventDefault();
@@ -24,7 +24,9 @@ const AddUser = ({currentUser, position}) => {
             const uploadResponse = await fileAPI.post("/upload", formData);
 
             setPictureName(uploadResponse.data.data);
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const removePicture = async () => {
@@ -36,33 +38,40 @@ const AddUser = ({currentUser, position}) => {
 
                 await fileAPI.put('/remove', {picture: temp});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const addUser = async (e) => {
         e.preventDefault();
-        e.target.reset();
 
-        try {
-            await usersAPI.post(`/${currentUser.id}`, 
-            {
-                name: name,
-                username: username,
-                email: email,
-                password: password,
-                picture: pictureName,
-                position: position,
-                school_id: currentUser.id
-            });
+        if (name === "" || email === "" || username === "" || password === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await usersAPI.post(`/${currentUser.id}`, 
+                {
+                    name: name,
+                    username: username,
+                    email: email,
+                    password: password,
+                    picture: pictureName,
+                    position: position,
+                    school_id: currentUser.id
+                });
 
-            setName("");
-            setEmail("");
-            setUsername("");
-            setPassword("");
-            setPictureFile("");
-            setPictureName("default.png");
-            displayMessageAddedInterval();
-        } catch (err) {}
+                setName("");
+                setEmail("");
+                setUsername("");
+                setPassword("");
+                setPictureFile("");
+                setPictureName("default.png");
+                displayMessageAddedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            }
+        }
     }
 
     return (
@@ -96,6 +105,7 @@ const AddUser = ({currentUser, position}) => {
                 </div>
             </form>
             {displayAddedMessage && <p>Added</p>}
+            {displayErrorMessage && <p>{error}</p>}
         </>
     )
 }

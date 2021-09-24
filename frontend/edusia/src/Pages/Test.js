@@ -13,7 +13,7 @@ const Test = ({currentUser}) => {
     const [test, setTest] = useState();
     const classID = useParams().class;
     const testID = useParams().id;
-    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
+    const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,7 +32,9 @@ const Test = ({currentUser}) => {
                 setStudents(response.data.data.students);
                 setTest(response.data.data.test);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData()
     }, [])
@@ -55,7 +57,9 @@ const Test = ({currentUser}) => {
             setGrades(previousState => Object.assign([], previousState, {[e.target.id]: updateGrades[e.target.id]}));
             setEdit(previousState => Object.assign([], previousState, {[e.target.id]: false}));
             displayMessageUpdatedInterval();
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const cancelGrade = (i) => {
@@ -111,6 +115,7 @@ const Test = ({currentUser}) => {
                         )
                     })}
                     {displayUpdatedMessage && <p>Updated</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>   

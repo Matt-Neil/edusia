@@ -10,39 +10,12 @@ const createToken = (id) => {
     })
 }
 
-const handleErrors = (err) => {
-    let errors = { email: "", password: "", name: "" };
-
-    if (err.message === "Incorrect email") {
-        errors.email = "Incorrect email"
-    }
-
-    if (err.message === "Incorrect password") {
-        errors.password = "Incorrect password"
-    }
-
-    if (err.code === 11000) {
-        errors.email = 'That email has already been registered';
-        return errors;
-    }
-
-    if (err.message.includes('User validation failed')) {
-        Object.values(err.errors).forEach(({properties}) => {
-            errors[properties.path] = properties.message;
-        })
-    }
-
-    return errors;
-}
-
 exports.postLogin = async (req, res, next) => {
     try {
-        let user;
-        
-        user = await db.query("SELECT * FROM users WHERE email = $1", [req.body.email]);
+        const user = await db.query("SELECT * FROM users WHERE email = $1", [req.body.email]);
             
         if (user.rows.length === 1) {
-            const auth = await bcrypt.compare(req.body.password, user.password);
+            const auth = await bcrypt.compare(req.body.password, user.rows[0].password);
     
             if (auth) {
                 const token = createToken(user.rows[0].id);
@@ -52,23 +25,17 @@ exports.postLogin = async (req, res, next) => {
                     success: true,
                     data: user.rows[0]
                 })
+            } else {
+                throw "Wrong Password"
             }
-            throw Error("Incorrect password")
+        } else {
+            throw "Wrong Email"
         }
-        throw Error("Incorrect username")
-
-        // const token = createToken(user.rows[0].id);
-
-        // res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
-        // res.status(201).json({
-        //     success: true,
-        //     data: user.rows[0]
-        // })
-
     } catch (err) {
-        console.log(err)
-        const errors = handleErrors(err);
-        res.status(400).json({ errors });
+        res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        })
     }
 }
 
@@ -87,8 +54,10 @@ exports.postUser = async (req, res, next) => {
         })
 
     } catch (err) {
-        const errors = handleErrors(err);
-        res.status(400).json({ errors });
+        res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        })
     }
 }
 
@@ -108,8 +77,10 @@ exports.postSchool = async (req, res, next) => {
         })
 
     } catch (err) {
-        const errors = handleErrors(err);
-        res.status(400).json({ errors });
+        res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        })
     }
 }
 
@@ -126,9 +97,3 @@ exports.getUser = async (req, res, next) => {
         })
     }
 }
-
-// UsersSchema.pre('save', async function (next) {
-//     this.password = await bcrypt.hash(this.password.toString(), 10);
-    
-//     next()
-// })

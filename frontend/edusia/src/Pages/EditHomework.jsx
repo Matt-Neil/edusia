@@ -18,7 +18,7 @@ const EditHomework = () => {
     const [loaded, setLoaded] = useState(false);
     const homeworkID = useParams().id;
     const classID = useParams().class;
-    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
+    const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -27,7 +27,9 @@ const EditHomework = () => {
 
                 setHomework(homework.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData();
     }, [])
@@ -50,16 +52,22 @@ const EditHomework = () => {
     const updateHomework = async (e) => {
         e.preventDefault();
 
-        try {
-            await homeworkAPI.put(`/${homeworkID}`, {
-                title: title,
-                description: description,
-                deadline: deadline,
-                file: fileName
-            })
+        if (title === "" || description === "" || deadline === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await homeworkAPI.put(`/${homeworkID}`, {
+                    title: title,
+                    description: description,
+                    deadline: deadline,
+                    file: fileName
+                })
 
-            displayMessageUpdatedInterval();
-        } catch (err) {}
+                displayMessageUpdatedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            }
+        }
     }
 
     const uploadFile = async (e) => {
@@ -76,7 +84,9 @@ const EditHomework = () => {
             if (fileName !== "") {
                 await fileAPI.put('/remove', {file: fileName});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const removeFile = async () => {
@@ -89,7 +99,9 @@ const EditHomework = () => {
 
                 await fileAPI.put('/remove', {file: temp});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     return (
@@ -160,6 +172,7 @@ const EditHomework = () => {
                         </div>
                     </form>
                     {displayUpdatedMessage && <p>Updated</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>

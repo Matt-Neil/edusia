@@ -18,7 +18,7 @@ const Homework = ({currentUser}) => {
     const homeworkID = useParams().id;
     const classID = useParams().class;
     const history = useHistory();
-    const {displayAddedMessage, displayMessageAddedInterval} = useContext(MessageContext);
+    const {displayAddedMessage, displayErrorMessage, displayMessageAddedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,7 +29,9 @@ const Homework = ({currentUser}) => {
                 setHomework(homework.data.data);
                 setSubmissions(submissions.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData();
     }, [])
@@ -38,6 +40,8 @@ const Homework = ({currentUser}) => {
         if (loaded) {
             if (homework.deadline > new Date().toISOString()) {
                 setExpired(false);
+            } else {
+                setExpired(true);
             }
             setCompleted(submissions.completed);
         }
@@ -48,6 +52,8 @@ const Homework = ({currentUser}) => {
             timeoutID.current = setTimeout(() => {
                 if (homework.deadline > new Date().toISOString()) {
                     setExpired(false);
+                } else {
+                    setExpired(true);
                 }
             }, 1000)
             return () => {clearTimeout(timeoutID.current)}
@@ -57,10 +63,10 @@ const Homework = ({currentUser}) => {
     const uploadFile = async (e) => {
         e.preventDefault();
 
-        const formData = new FormData();
-        formData.append('uploadedFile', submissionFile);
-
         try {
+            const formData = new FormData();
+            formData.append('uploadedFile', submissionFile);
+
             const uploadResponse = await fileAPI.post("/upload", formData);
             
             setSubmissions(previousState => ({...previousState, submission: uploadResponse.data.data}));
@@ -73,8 +79,11 @@ const Homework = ({currentUser}) => {
                 await fileAPI.put('/remove', {file: submissions.submission});
             }
 
+            setAdjustSubmission(false);
             displayMessageAddedInterval();
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const removeFile = async () => {
@@ -89,23 +98,27 @@ const Homework = ({currentUser}) => {
 
                 await fileAPI.put('/remove', {file: temp});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const displayDate = () => {
         const date = moment(homework.deadline);
         
-        return date.utc().format("HH:mm DD/MM/YYYY")
+        return date.utc().format("DD/MM/YYYY")
     }
 
     const markComplete = async () => {
         try {
+            setCompleted(previousState => !previousState)
+
             await homeworkAPI.put(`/${homeworkID}/completed`, {
                 state: submissions.completed
             });
-
-            setCompleted(previousState => !previousState)
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const removeSubmission = async () => {
@@ -117,7 +130,9 @@ const Homework = ({currentUser}) => {
             await homeworkAPI.put(`/${homeworkID}/submissions?type=delete`);
 
             await fileAPI.put('/remove', {file: temp});
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const deleteHomework = async () => {
@@ -125,7 +140,9 @@ const Homework = ({currentUser}) => {
             await homeworkAPI.delete(`/${homeworkID}`)
 
             history.replace(`/class/${classID}`)
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     return (
@@ -208,6 +225,7 @@ const Homework = ({currentUser}) => {
                         }
                     </div>
                     {displayAddedMessage && <p>Added</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>

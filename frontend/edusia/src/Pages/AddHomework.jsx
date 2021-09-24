@@ -19,7 +19,7 @@ const AddHomework = ({currentUser}) => {
     const [fileName, setFileName] = useState("");
     const [file, setFile] = useState("");
     const classID = useParams().id;
-    const {displayAddedMessage, displayMessageAddedInterval} = useContext(MessageContext);
+    const {displayAddedMessage, displayMessageAddedInterval, displayErrorMessage, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -30,7 +30,9 @@ const AddHomework = ({currentUser}) => {
                 setClasses(classes);
                 setStudents(students.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData()
     }, [])
@@ -44,24 +46,30 @@ const AddHomework = ({currentUser}) => {
     const postHomework = async (e) => {
         e.preventDefault();
 
-        try {
-            await homeworkAPI.post("/", {
-                class_id: classID,
-                teacher_id: currentUser.id,
-                title: title,
-                description: description,
-                deadline: deadline,
-                file: fileName,
-                students: students
-            })
-            
-            setTitle("");
-            setDescription("");
-            setDeadline("");
-            setFileName("");
-            setPickerDate(new Date())
-            displayMessageAddedInterval();
-        } catch (err) {}
+        if (title === "" || description === "" || deadline === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await homeworkAPI.post("/", {
+                    class_id: classID,
+                    teacher_id: currentUser.id,
+                    title: title,
+                    description: description,
+                    deadline: deadline,
+                    file: fileName,
+                    students: students
+                })
+                
+                setTitle("");
+                setDescription("");
+                setDeadline("");
+                setFileName("");
+                setPickerDate(new Date())
+                displayMessageAddedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            }
+        }
     }
 
     const uploadFile = async (e) => {
@@ -78,7 +86,9 @@ const AddHomework = ({currentUser}) => {
             if (fileName !== "") {
                 await fileAPI.put('/remove', {file: fileName});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const removeFile = async () => {
@@ -91,7 +101,9 @@ const AddHomework = ({currentUser}) => {
 
                 await fileAPI.put('/remove', {file: temp});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     return (
@@ -162,6 +174,7 @@ const AddHomework = ({currentUser}) => {
                         </div>
                     </form>
                     {displayAddedMessage && <p>Added</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>

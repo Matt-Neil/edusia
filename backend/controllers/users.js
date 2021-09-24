@@ -6,7 +6,7 @@ exports.getSettings = async (req, res, next) => {
         let user;
 
         if (res.locals.currentUser.position !== "school") {
-            user = await db.query("SELECT picture, password FROM users WHERE id = $1", 
+            user = await db.query("SELECT picture, password FROM users WHERE id = $1 AND school_id = $2", 
                 [res.locals.currentUser.id, res.locals.currentUser.school_id]);
         } else {
             user = await db.query("SELECT picture, password FROM schools WHERE id = $1", 
@@ -52,7 +52,7 @@ exports.putSettings = async (req, res, next) => {
 
 exports.getDetentions = async (req, res, next) => {
     try {
-        const detentions = await db.query("SELECT classes.subject, classes.class_code, detentions.duration, detentions.location, detentions.date FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND classes.school_id = $2", 
+        const detentions = await db.query("SELECT classes.subject, classes.class_code, detentions.location, detentions.date FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND classes.school_id = $2", 
             [res.locals.currentUser.id, res.locals.currentUser.school_id]);
 
         res.status(201).json({

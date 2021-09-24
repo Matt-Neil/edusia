@@ -33,8 +33,8 @@ const Class = ({currentUser}) => {
     const [finishedHomework, setFinishedHomework] = useState(false);
     const [finishedTests, setFinishedTests] = useState(false);
     const [finishedNotifications, setFinishedNotifications] = useState(false);
-    const {displayAddedMessage, displayUpdatedMessage, displayDeletedMessage, 
-        displayMessageAddedInterval, displayMessageUpdatedInterval, displayMessageDeletedInterval} = useContext(MessageContext);
+    const {displayAddedMessage, displayUpdatedMessage, displayDeletedMessage, displayErrorMessage,
+        displayMessageAddedInterval, displayMessageUpdatedInterval, displayMessageDeletedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
     const classID = useParams().id;
 
     useEffect(() => {
@@ -74,7 +74,9 @@ const Class = ({currentUser}) => {
                 setHomework(homework.data.data);
                 setNotifications(notifications.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData()
     }, [])
@@ -101,7 +103,9 @@ const Class = ({currentUser}) => {
                 }
     
                 setTests(testsPrevious => [...testsPrevious, ...loadTests.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Tests")
+            }
         }
     }
 
@@ -115,7 +119,9 @@ const Class = ({currentUser}) => {
                 }
     
                 setHomework(homeworkPrevious => [...homeworkPrevious, ...loadHomework.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Homework")
+            }
         }
     }
 
@@ -129,7 +135,9 @@ const Class = ({currentUser}) => {
                 }
     
                 setNotifications(notificationsPrevious => [...notificationsPrevious, ...loadNotifications.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Notifications")
+            }
         }
     }
 
@@ -164,28 +172,34 @@ const Class = ({currentUser}) => {
     const postTest = async (e) => {
         e.preventDefault();
 
-        try {
-            const newTest = await testsAPI.post(`/${classID}`, {
-                title: title,
-                date: testDate,
-                students: students
-            })
+        if (title === "" || testDate === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                const newTest = await testsAPI.post(`/${classID}`, {
+                    title: title,
+                    date: testDate,
+                    students: students
+                })
 
-            const testObject = {
-                id: newTest.data.data.id,
-                class_id: classID,
-                date: testDate,
-                title: title
-            };
+                const testObject = {
+                    id: newTest.data.data.id,
+                    class_id: classID,
+                    date: testDate,
+                    title: title
+                };
 
-            setTests(testsPrevious => [testObject, ...testsPrevious]);
-            setUpdateTests(testsPrevious => [testObject, ...testsPrevious]);
-            setEditTests(testsPrevious => [false, ...testsPrevious]);
-            setTitle("");
-            setTestDate("");
-            setTestPickerDate(new Date());
-            displayMessageAddedInterval()
-        } catch (err) {}
+                setTests(testsPrevious => [testObject, ...testsPrevious]);
+                setUpdateTests(testsPrevious => [testObject, ...testsPrevious]);
+                setEditTests(testsPrevious => [false, ...testsPrevious]);
+                setTitle("");
+                setTestDate("");
+                setTestPickerDate(new Date());
+                displayMessageAddedInterval()
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            }
+        }
     }
 
     const updateTest = async (e) => {
@@ -196,11 +210,19 @@ const Class = ({currentUser}) => {
             date: updateNotifications[e.target.id].date
         }
 
-        await testsAPI.put(`/${notifications[e.target.id].id}`, updatedTest)
+        if (updatedTest.title === "" || updatedTest.date === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await testsAPI.put(`/${notifications[e.target.id].id}`, updatedTest)
 
-        setTests(previousState => Object.assign([], previousState, {[e.target.id]: updatedTest}));
-        setEditTests(previousState => Object.assign([], previousState, {[e.target.id]: false}))
-        displayMessageUpdatedInterval()
+                setTests(previousState => Object.assign([], previousState, {[e.target.id]: updatedTest}));
+                setEditTests(previousState => Object.assign([], previousState, {[e.target.id]: false}))
+                displayMessageUpdatedInterval()
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            }
+        }
     }
 
     const deleteTest = async (id, index) => {
@@ -211,7 +233,9 @@ const Class = ({currentUser}) => {
             setUpdateTests(updateTests.filter(test => test.id !== id));
             setEditTests(editTests.filter((edit, i) => i !== index));
             displayMessageDeletedInterval()
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const cancelTest = (i) => {
@@ -222,28 +246,34 @@ const Class = ({currentUser}) => {
     const postNotification = async (e) => {
         e.preventDefault();
 
-        try {
-            const newNotification = await notificationsAPI.post("/", {
-                class_id: classID,
-                expire: notificationDate,
-                notification: notification
-            })
+        if (notificationDate === "" || notification === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                const newNotification = await notificationsAPI.post("/", {
+                    class_id: classID,
+                    expire: notificationDate,
+                    notification: notification
+                })
 
-            const notificationObject = {
-                id: newNotification.data.data.id,
-                class_id: classID,
-                expire: notificationDate,
-                notification: notification
-            }
-            
-            setNotifications(notificationsPrevious => [notificationObject, ...notificationsPrevious]);
-            setUpdateNotifications(notificationsPrevious => [notificationObject, ...notificationsPrevious]);
-            setEditNotifications(notificationsPrevious => [false, ...notificationsPrevious]);
-            setNotification("");
-            setNotificationDate("");
-            setNotificationPickerDate(new Date());
-            displayMessageAddedInterval();
-        } catch (err) {}
+                const notificationObject = {
+                    id: newNotification.data.data.id,
+                    class_id: classID,
+                    expire: notificationDate,
+                    notification: notification
+                }
+                
+                setNotifications(notificationsPrevious => [notificationObject, ...notificationsPrevious]);
+                setUpdateNotifications(notificationsPrevious => [notificationObject, ...notificationsPrevious]);
+                setEditNotifications(notificationsPrevious => [false, ...notificationsPrevious]);
+                setNotification("");
+                setNotificationDate("");
+                setNotificationPickerDate(new Date());
+                displayMessageAddedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            } 
+        }
     }
 
     const updateNotification = async (e) => {
@@ -254,11 +284,19 @@ const Class = ({currentUser}) => {
             expire: updateNotifications[e.target.id].expire
         }
 
-        await notificationsAPI.put(`/${notifications[e.target.id].id}/class`, updatedNotification)
+        if (updatedNotification.expire === "" || updatedNotification.notification === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await notificationsAPI.put(`/${notifications[e.target.id].id}/class`, updatedNotification)
 
-        setNotifications(previousState => Object.assign([], previousState, {[e.target.id]: updatedNotification}));
-        setEditNotifications(previousState => Object.assign([], previousState, {[e.target.id]: false}))
-        displayMessageUpdatedInterval();
+                setNotifications(previousState => Object.assign([], previousState, {[e.target.id]: updatedNotification}));
+                setEditNotifications(previousState => Object.assign([], previousState, {[e.target.id]: false}))
+                displayMessageUpdatedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            }
+        }
     }
 
     const deleteNotification = async (id, index) => {
@@ -269,7 +307,9 @@ const Class = ({currentUser}) => {
             setUpdateNotifications(updateNotifications.filter(notification => notification.id !== id));
             setEditNotifications(editNotifications.filter((edit, i) => i !== index));
             displayMessageDeletedInterval();
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const cancelNotification = (i) => {
@@ -597,6 +637,7 @@ const Class = ({currentUser}) => {
                     {displayAddedMessage && <p>Added</p>}
                     {displayUpdatedMessage && <p>Updated</p>}
                     {displayDeletedMessage && <p>Deleted</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }      
         </>   

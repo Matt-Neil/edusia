@@ -9,6 +9,7 @@ import UserCard from '../Components/UserCard'
 import ClassCard from "../Components/ClassCard"
 import { CompletedContext } from '../Contexts/completedContext';
 import { ExpiredContext } from '../Contexts/expiredContext';
+import { MessageContext } from '../Contexts/messageContext';
 import Header from "../Components/Header"
 
 const Home = ({currentUser}) => {
@@ -28,19 +29,24 @@ const Home = ({currentUser}) => {
     const [finishedClasses, setFinishedClasses] = useState(false);
     const {completed, changeCompleted} = useContext(CompletedContext);
     const {expired, changeExpired} = useContext(ExpiredContext);
+    const {displayErrorMessage, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
             switch (currentUser.position) {
                 case "student":
-                    const homework = await homeworkAPI.get("/student?date=2020-01-01T00:15:00.000Z");
+                    try {
+                         const homework = await homeworkAPI.get("/student?date=2020-01-01T00:15:00.000Z");
 
-                    if (homework.data.data.length < 10) {
-                        setFinishedHomework(true);
+                        if (homework.data.data.length < 10) {
+                            setFinishedHomework(true);
+                        }
+
+                        setHomework(homework.data.data);
+                        setLoaded(true);
+                    } catch (err) {
+                        displayMessageErrorInterval("Error Loading Page")
                     }
-
-                    setHomework(homework.data.data);
-                    setLoaded(true);
                     break;
                 case "teacher":
                     try {
@@ -48,7 +54,9 @@ const Home = ({currentUser}) => {
             
                         setClasses(classes.data.data);
                         setLoaded(true);
-                    } catch (err) {}
+                    } catch (err) {
+                        displayMessageErrorInterval("Error Loading Page")
+                    }
                     break;
                 case "school":
                     try {
@@ -72,7 +80,9 @@ const Home = ({currentUser}) => {
                         setTeachers(teachers.data.data);
                         setStudents(students.data.data);
                         setLoaded(true);
-                    } catch (err) {}
+                    } catch (err) {
+                        displayMessageErrorInterval("Error Loading Page")
+                    }
                     break;
             }
         }
@@ -90,7 +100,9 @@ const Home = ({currentUser}) => {
     
                 setHomework(homeworkPrevious => [...homeworkPrevious, ...loadHomework.data.data]);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Homework")
+            }
         }
     };
 
@@ -104,7 +116,9 @@ const Home = ({currentUser}) => {
             }
 
             setTeachers(teachersPrevious => [...teachersPrevious, ...loadTeachers.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Teachers")
+            }
         }
     };
 
@@ -118,7 +132,9 @@ const Home = ({currentUser}) => {
                 }
 
                 setStudents(studentsPrevious => [...studentsPrevious, ...loadStudents.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Students")
+            }
         }
     };
 
@@ -132,7 +148,9 @@ const Home = ({currentUser}) => {
                 }
     
                 setClasses(classesPrevious => [...classesPrevious, ...loadClasses.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Classes")
+            }
         }
     };
 
@@ -146,17 +164,23 @@ const Home = ({currentUser}) => {
                 }
     
                 setSearchResults(resultsPrevious => [...resultsPrevious, ...results.data.data]);
-            } catch (err) {console.log(err)}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Results")
+            }
         }
     };
 
     const search = async (e) => {
         e.preventDefault();
 
-        const results = await searchAPI.get(`?phrase=${searchPhrase}&type=${options}`);
+        try {
+            const results = await searchAPI.get(`?phrase=${searchPhrase}&type=${options}`);
 
-        setSearchResults(results.data.data);
-        setDisplaySearch(true);
+            setSearchResults(results.data.data);
+            setDisplaySearch(true);
+        } catch (err) {
+            displayMessageErrorInterval("Error Loading Page")
+        }
     }
     
     const cancelSearch = () => {
@@ -180,11 +204,10 @@ const Home = ({currentUser}) => {
                     {currentUser.position === "student" &&
                         <>
                             <div className="toolbar">
-                                <select>All Subjects</select>
-                                <select>All Classes</select>
-                                <select>Sort by Due Date</select>
-                                <button onClick={() => {changeCompleted()}}>Show Completed</button>
-                                <button onClick={() => {changeExpired()}}>Show Expired</button>
+                                <input type="checkbox" checked={completed} onChange={() => {changeCompleted()}} />
+                                <label>Show Completed</label>
+                                <input type="checkbox" checked={expired} onChange={() => {changeExpired()}} />
+                                <label>Show Expired</label>
                             </div>
                             <div className="innerBody">
                                 {completed && expired &&
@@ -350,6 +373,7 @@ const Home = ({currentUser}) => {
                             </div>
                         </>
                     }
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>

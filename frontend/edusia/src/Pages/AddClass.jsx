@@ -14,32 +14,37 @@ const AddClass = ({currentUser}) => {
     const [teachersResults, setTeachersResults] = useState([]);
     const [studentsResults, setStudentsResults] = useState([]);
     const [students, setStudents] = useState([]);
-    const {displayAddedMessage, displayMessageAddedInterval} = useContext(MessageContext);
+    const {displayAddedMessage, displayMessageAddedInterval, displayErrorMessage, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     const addClass = async (e) => {
         e.preventDefault();
-        e.target.reset();
+        
+        if (teacher_id === "" || subject === "" || class_code === "" || students === []) {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await classesAPI.post(`/${currentUser.id}`, 
+                {
+                    subject: subject,
+                    teacher_id: teacher_id,
+                    class_code: class_code,
+                    students: students,
+                    school_id: currentUser.id
+                });
 
-        try {
-            await classesAPI.post(`/${currentUser.id}`, 
-            {
-                subject: subject,
-                teacher_id: teacher_id,
-                class_code: class_code,
-                students: students,
-                school_id: currentUser.id
-            });
-
-            setSubject("");
-            setTeacher_id("");
-            setClass_code("");
-            setStudents([]);
-            setSearchStudent("");
-            setSearchTeacher("");
-            setTeachersResults([]);
-            setStudentsResults([]);
-            displayMessageAddedInterval();
-        } catch (err) {}
+                setSubject("");
+                setTeacher_id("");
+                setClass_code("");
+                setStudents([]);
+                setSearchStudent("");
+                setSearchTeacher("");
+                setTeachersResults([]);
+                setStudentsResults([]);
+                displayMessageAddedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
+        }
     }
 
     const appendStudent = (student) => {
@@ -110,6 +115,7 @@ const AddClass = ({currentUser}) => {
                 )
             })}
             {displayAddedMessage && <p>Added</p>}
+            {displayErrorMessage && <p>{error}</p>}
         </>
     )
 }

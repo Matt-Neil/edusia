@@ -15,7 +15,7 @@ const EditUser = ({currentUser}) => {
     const [pictureName, setPictureName] = useState("");
     const [password, setPassword] = useState("");
     const userID = useParams().id;
-    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
+    const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -24,7 +24,9 @@ const EditUser = ({currentUser}) => {
 
                 setUser(response.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData();
     }, [])
@@ -48,7 +50,9 @@ const EditUser = ({currentUser}) => {
             const uploadResponse = await imageAPI.post("/upload", formData);
 
             setPictureName(uploadResponse.data.data);
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const removePicture = async () => {
@@ -60,30 +64,38 @@ const EditUser = ({currentUser}) => {
 
                 await imageAPI.put('/remove', {file: temp});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const editUser = async (e) => {
         e.preventDefault();
 
-        try {
-            if (password === "") {
-                setPassword(user.password);
+        if (name === "" || username === "" || email === "" || password === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                if (password === "") {
+                    setPassword(user.password);
+                }
+
+                await usersAPI.put(`/${userID}/edit`, 
+                {
+                    name: name,
+                    username: username,
+                    email: email,
+                    password: password,
+                    picture: pictureName,
+                    position: user.position,
+                    school_id: user.school_id
+                });
+
+                displayMessageUpdatedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
             }
-
-            await usersAPI.put(`/${userID}/edit`, 
-            {
-                name: name,
-                username: username,
-                email: email,
-                password: password,
-                picture: pictureName,
-                position: user.position,
-                school_id: user.school_id
-            });
-
-            displayMessageUpdatedInterval();
-        } catch (err) {}
+        }
     }
 
     return (
@@ -117,6 +129,7 @@ const EditUser = ({currentUser}) => {
                         </div>
                     </form>
                     {displayUpdatedMessage && <p>Updated</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>

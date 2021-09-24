@@ -10,7 +10,7 @@ const Settings = () => {
     const [pictureName, setPictureName] = useState("");
     const [password, setPassword] = useState("");
     const [loaded, setLoaded] = useState(false);
-    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
+    const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -19,7 +19,9 @@ const Settings = () => {
 
                 setUser(response.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData();
     }, [])
@@ -44,7 +46,9 @@ const Settings = () => {
             if (pictureName !== "") {
                 await fileAPI.put('/remove', {file: pictureName});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const removePicture = async () => {
@@ -57,32 +61,31 @@ const Settings = () => {
 
                 await fileAPI.put('/remove', {picture: temp});
             }
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const updateUser = async (e) => {
         e.preventDefault();
-        e.target.reset();
 
         try {
             if (password === "") {
-                await usersAPI.put(`/settings`, 
-                {
-                    password: user.password,
-                    picture: pictureName
-                });
+                displayMessageErrorInterval("Blank Password")
             } else {
                 await usersAPI.put(`/settings`, 
                 {
                     password: password,
                     picture: pictureName
                 });
-            }
 
-            setPassword("");
-            setPictureName(user.picture);
-            displayMessageUpdatedInterval();
-        } catch (err) {}
+                setPassword("");
+                setPictureName(user.picture);
+                displayMessageUpdatedInterval();
+            }
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     return (
@@ -107,6 +110,7 @@ const Settings = () => {
                 </div>
             </form>
             {displayUpdatedMessage && <p>Updated</p>}
+            {displayErrorMessage && <p>{error}</p>}
         </>
     )
 }

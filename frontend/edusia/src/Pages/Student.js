@@ -22,8 +22,8 @@ const Student = ({currentUser}) => {
     const [detentionLocation, setDetentionLocation] = useState("");
     const [detentionReason, setDetentionReason] = useState("");
     const [pickerDate, setPickerDate] = useState(new Date());
-    const {displayAddedMessage, displayUpdatedMessage, displayDeletedMessage, 
-        displayMessageAddedInterval, displayMessageUpdatedInterval, displayMessageDeletedInterval} = useContext(MessageContext);
+    const {displayAddedMessage, displayUpdatedMessage, displayDeletedMessage, displayErrorMessage,
+        displayMessageAddedInterval, displayMessageUpdatedInterval, displayMessageDeletedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
     const studentID = useParams().id;
     const classID = useParams().class;
     const history = useHistory();
@@ -61,7 +61,9 @@ const Student = ({currentUser}) => {
                 setNotes(notes.data.data);
                 setDetentions(detentions.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData()
     }, [])
@@ -82,7 +84,9 @@ const Student = ({currentUser}) => {
                 }
     
                 setNotes(notesPrevious => [...notesPrevious, ...loadNotes.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Notes")
+            }
         }
     };
 
@@ -96,56 +100,66 @@ const Student = ({currentUser}) => {
             }
 
             setDetentions(detentionsPrevious => [...detentionsPrevious, ...loadDetentions.data.data]);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Detentions")
+            }
         }
     };
 
     const postNote = async (e) => {
         e.preventDefault();
 
-        try {
-            const newNote = await usersAPI.post(`/student/${studentID}/lesson/notes?class=${classID}`, {
-                class_id: classID,
-                student_id: studentID,
-                note: addNote,
-                created: new Date().toISOString()
-            })
+        if (addNote === "") {
+            displayMessageErrorInterval()
+        } else {
+            try {
+                const newNote = await usersAPI.post(`/student/${studentID}/lesson/notes?class=${classID}`, {
+                    class_id: classID,
+                    student_id: studentID,
+                    note: addNote,
+                    created: new Date().toISOString()
+                })
 
-            const noteObject = {
-                id: newNote.data.data.id,
-                class_id: classID,
-                student_id: studentID,
-                note: addNote,
-                created: newNote.data.data.created
+                const noteObject = {
+                    id: newNote.data.data.id,
+                    class_id: classID,
+                    student_id: studentID,
+                    note: addNote,
+                    created: newNote.data.data.created
+                }
+
+                setNotes(notePrevious => [noteObject, ...notePrevious]);
+                setUpdateNotes(notePrevious => [noteObject, ...notePrevious]);
+                setEditNotes(notesPrevious => [false, ...notesPrevious]);
+                setAddNote("");
+                displayMessageAddedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
             }
-
-            setNotes(notePrevious => [noteObject, ...notePrevious]);
-            setUpdateNotes(notePrevious => [noteObject, ...notePrevious]);
-            setEditNotes(notesPrevious => [false, ...notesPrevious]);
-            setAddNote("");
-            displayMessageAddedInterval();
-        } catch (err) {}
+        }
     }
 
     const updateNote = async (e) => {
         e.preventDefault();
 
-        for (let i = 0; i < updateNotes.length; i++) {
-            if (updateNotes[i] !== notes[i].note) {
-                try {
-                    await usersAPI.put(`/student/${studentID}/lesson/notes?class=${classID}`, {
-                        note: updateNotes[i],
-                        id: notes[i].id
-                    })
-
-                    setNotes(previousState => Object.assign([], previousState, {[i]: {
-                        note: updateNotes[i],
-                        created: notes[i].created,
-                        id: notes[i].id
-                    }}));
-                    setEditNotes(previousState => Object.assign([], previousState, {[i]: false}))
-                    displayMessageUpdatedInterval();
-                } catch (err) {}
+        if (updateNotes[e.target.id] === "") {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await usersAPI.put(`/student/${studentID}/lesson/notes?class=${classID}`, {
+                    note: updateNotes[e.target.id],
+                    id: notes[e.target.id].id
+                })
+    
+                setNotes(previousState => Object.assign([], previousState, {[e.target.id]: {
+                    note: updateNotes[e.target.id],
+                    created: notes[e.target.id].created,
+                    id: notes[e.target.id].id
+                }}));
+                setEditNotes(previousState => Object.assign([], previousState, {[e.target.id]: false}))
+                displayMessageUpdatedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
             }
         }
     }
@@ -158,7 +172,9 @@ const Student = ({currentUser}) => {
             setUpdateNotes(updateNotes.filter(note => note.id !== id));
             setEditNotes(editNotes.filter((edit, i) => i !== index));
             displayMessageDeletedInterval();
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const postDetention = async (e) => {
@@ -190,30 +206,33 @@ const Student = ({currentUser}) => {
             setDetentionDate("");
             setDetentionReason("");
             displayMessageAddedInterval();
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     const updateDetention = async (e) => {
         e.preventDefault();
 
-        for (let i = 0; i < updateDetentions.length; i++) {
-            if (updateDetentions[i].location !== detentions[i].location || updateDetentions[i].date !== detentions[i].date || 
-                updateDetentions[i].reason !== detentions[i].reason) {
-                try {
-                    const updatedDetention = {
-                        location: updateDetentions[i].location,
-                        date: updateDetentions[i].date,
-                        reason: updateDetentions[i].reason,
-                        id: updateDetentions[i].id
-                    }
-
-                    await usersAPI.put(`/student/${studentID}/lesson/detentions?class=${classID}`, updatedDetention)
-
-                    setDetentions(previousState => Object.assign([], previousState, {[i]: updatedDetention}));
-                    setEditDetentions(previousState => Object.assign([], previousState, {[i]: false}))
-                    displayMessageUpdatedInterval();
-                } catch (err) {}
+        try {
+            const updatedDetention = {
+                location: updateDetentions[e.target.id].location,
+                date: updateDetentions[e.target.id].date,
+                reason: updateDetentions[e.target.id].reason,
+                id: updateDetentions[e.target.id].id
             }
+
+            if (updatedDetention.location === "" || updatedDetention.date === "" || updatedDetention.reason === "") {
+                displayMessageErrorInterval("No Blank Fields")
+            } else {
+                await usersAPI.put(`/student/${studentID}/lesson/detentions?class=${classID}`, updatedDetention)
+
+                setDetentions(previousState => Object.assign([], previousState, {[e.target.id]: updatedDetention}));
+                setEditDetentions(previousState => Object.assign([], previousState, {[e.target.id]: false}))
+                displayMessageUpdatedInterval();
+            }
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
         }
     }
 
@@ -225,7 +244,9 @@ const Student = ({currentUser}) => {
             setUpdateDetentions(updateDetentions.filter(detention => detention.id !== id));
             setEditDetentions(editDetentions.filter((edit, i) => i !== index));
             displayMessageDeletedInterval();
-        } catch (err) {}
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
     }
 
     return (
@@ -252,7 +273,7 @@ const Student = ({currentUser}) => {
                                     <div key={i}>
                                         {editNotes[i] ?
                                             <>
-                                                <form className="loginBody" method="PUT" onSubmit={updateNote}>
+                                                <form className="loginBody" method="PUT" onSubmit={updateNote} id={i}>
                                                     <div className="multipleInput">
                                                         <input className="textInputLogin text5" type="text" name="note" placeholder="Note" value={updateNotes[i]} onChange={e => {setUpdateNotes(previousState => Object.assign([], previousState, {[i]: e.target.value}))}} />
                                                     </div>
@@ -335,7 +356,7 @@ const Student = ({currentUser}) => {
                                     <div key={i}>
                                         {editDetentions[i] ?
                                             <>
-                                                <form className="loginBody" method="PUT" onSubmit={updateDetention}>
+                                                <form className="loginBody" method="PUT" onSubmit={updateDetention} id={i}>
                                                     <div className="multipleInput">
                                                         <input className="textInputLogin text5" type="text" name="location" placeholder="Location" value={updateDetentions[i].location} onChange={e => {setUpdateDetentions(previousState => Object.assign([], previousState, {[i]: {
                                                             id: previousState[i].id,
@@ -422,6 +443,7 @@ const Student = ({currentUser}) => {
                     {displayAddedMessage && <p>Added</p>}
                     {displayUpdatedMessage && <p>Updated</p>}
                     {displayDeletedMessage && <p>Deleted</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>

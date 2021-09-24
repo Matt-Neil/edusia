@@ -1,12 +1,14 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import usersAPI from '../API/users'
 import Header from '../Components/Header';
+import { MessageContext } from '../Contexts/messageContext';
 
 const Noticeboard = ({currentUser}) => {
     const [notifications, setNotifications] = useState();
     const [detentions, setDetentions] = useState();
     const [displayNotifications, setDisplayNotifications] = useState(true);
     const [loaded, setLoaded] = useState(false);
+    const {displayErrorMessage, displayMessageErrorInterval, error} = useContext(MessageContext)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -17,7 +19,9 @@ const Noticeboard = ({currentUser}) => {
                 setNotifications(notifications.data.data);
                 setDetentions(detentions.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData();
     }, [])
@@ -52,6 +56,7 @@ const Noticeboard = ({currentUser}) => {
                             })}
                         </>
                     }
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>

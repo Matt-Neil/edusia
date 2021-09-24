@@ -5,8 +5,8 @@ const moment = require('moment');
 
 const HomeworkCard = ({homeworkReducer}) => {
     const date = moment(homeworkReducer.deadline);
-    const [completed, setCompleted] = useState(homeworkReducer.completed);
     const [expired, setExpired] = useState(false);
+    const [completed, setCompleted] = useState(homeworkReducer.completed);
     const timeoutID = useRef(null);
 
     useEffect(() => {
@@ -21,17 +21,16 @@ const HomeworkCard = ({homeworkReducer}) => {
     })
 
     const displayDate = () => {
-        return date.utc().format("HH:mm DD/MM/YYYY")
+        return date.utc().format("DD/MM/YYYY")
     }
 
-    const markComplete = async (e) => {
-
+    const markComplete = async () => {
         try {
-            await homeworkAPI.put(`/${homeworkReducer.id}/completed`, {
-                state: homeworkReducer.completed
-            });
+            setCompleted(previousState => !previousState);
 
-            setCompleted(previousState => !previousState)
+            await homeworkAPI.put(`/${homeworkReducer.id}/completed`, {
+                state: completed
+            });
         } catch (err) {}
     }
 
@@ -46,7 +45,7 @@ const HomeworkCard = ({homeworkReducer}) => {
             {completed ?
                 <button disabled={expired} onClick={() => {markComplete()}}>Mark Incomplete</button>
             :
-                <button disabled={expired} onClick={e => {window.addEventListener('click', markComplete()); markComplete(e)}}>Mark Complete</button>
+                <button disabled={expired} onClick={() => {markComplete()}}>Mark Complete</button>
             }
         </div>
     )

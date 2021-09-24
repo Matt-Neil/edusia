@@ -17,7 +17,7 @@ const EditClass = ({currentUser}) => {
     const [studentsResults, setStudentsResults] = useState([]);
     const [students, setStudents] = useState([]);
     const classID = useParams().id;
-    const {displayUpdatedMessage, displayMessageUpdatedInterval} = useContext(MessageContext);
+    const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,7 +26,9 @@ const EditClass = ({currentUser}) => {
     
                 setClasses(response.data.data);
                 setLoaded(true);
-            } catch (err) {}
+            } catch (err) {
+                displayMessageErrorInterval("Error Loading Page")
+            }
         }
         fetchData();
     }, [])
@@ -42,20 +44,25 @@ const EditClass = ({currentUser}) => {
 
     const addClass = async (e) => {
         e.preventDefault();
-        e.target.reset();
 
-        try {
-            await classesAPI.post(`/${currentUser.id}`, 
-            {
-                subject: subject,
-                teacher_id: teacher_id,
-                class_code: class_code,
-                students: students,
-                school_id: currentUser.id
-            });
+        if (teacher_id === "" || subject === "" || class_code === "" || students === []) {
+            displayMessageErrorInterval("No Blank Fields")
+        } else {
+            try {
+                await classesAPI.post(`/${currentUser.id}`, 
+                {
+                    subject: subject,
+                    teacher_id: teacher_id,
+                    class_code: class_code,
+                    students: students,
+                    school_id: currentUser.id
+                });
 
-            displayMessageUpdatedInterval();
-        } catch (err) {}
+                displayMessageUpdatedInterval();
+            } catch (err) {
+                displayMessageErrorInterval("Server Error")
+            }
+        }
     }
 
     const appendStudent = (student) => {
@@ -128,6 +135,7 @@ const EditClass = ({currentUser}) => {
                         )
                     })}
                     {displayUpdatedMessage && <p>Updated</p>}
+                    {displayErrorMessage && <p>{error}</p>}
                 </>
             }
         </>
