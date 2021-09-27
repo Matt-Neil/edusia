@@ -1,10 +1,11 @@
 import React, {useState, useEffect, useContext} from 'react'
 import homeworkAPI from "../API/homework"
 import fileAPI from "../API/file"
-import { Link, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import DatePicker from 'react-datepicker'
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
+import MessageCard from '../Components/MessageCard'
 
 const EditHomework = () => {
     const [classes, setClasses] = useState();
@@ -19,14 +20,19 @@ const EditHomework = () => {
     const homeworkID = useParams().id;
     const classID = useParams().class;
     const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
+    const history = useHistory();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const homework = await homeworkAPI.get(`/${homeworkID}`);
 
-                setHomework(homework.data.data);
-                setLoaded(true);
+                if (homework.data.data) {
+                    setHomework(homework.data.data);
+                    setLoaded(true);
+                } else {
+                    history.replace("/home");
+                }
             } catch (err) {
                 displayMessageErrorInterval("Error Loading Page")
             }
@@ -104,13 +110,24 @@ const EditHomework = () => {
         }
     }
 
+    const deleteHomework = async () => {
+        try {
+            await homeworkAPI.delete(`/${homeworkID}`)
+
+            history.replace(`/class/${classID}`)
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
+    }
+
     return (
         <>
             {loaded &&
                 <>
-                    <Header path={[{text: "Home", link: ""}, {text: `Class ${homework.class_code}`, link: `/class/${classID}`}, {text: homework.title, link: `/homework/${homeworkID}/${classID}`}, `Edit Homework`]} />
+                    <Header path={[{text: "Home", link: "/"}, {text: `Class ${homework.class_code}`, link: `/class/${classID}`}, `Edit ${homework.title}`]} />
                     <div className="toolbar">
-                        <Link to={`/homework/${homeworkID}/${classID}`}>Return to Homework</Link>
+                        <Link to={`/homework/${homeworkID}/${classID}`}>View Homework</Link>
+                        <button onClick={() => {deleteHomework()}}>Delete Homework</button>
                     </div>
                     <form method="POST" onSubmit={uploadFile} encType="multipart/form-data">
                         <div>
@@ -171,8 +188,8 @@ const EditHomework = () => {
                             <input className="pictureUpload text4" type="submit" value="Update Homework" />
                         </div>
                     </form>
-                    {displayUpdatedMessage && <p>Updated</p>}
-                    {displayErrorMessage && <p>{error}</p>}
+                    {displayUpdatedMessage && <MessageCard message={"Updated"} />}
+                    {displayErrorMessage && <MessageCard message={error} />}
                 </>
             }
         </>

@@ -36,17 +36,13 @@ const HomeworkCard = ({homeworkReducer}) => {
 
     return (
         <div className="homeworkCard">
-            <Link to={`/homework/${homeworkReducer.homework_id}/${homeworkReducer.class_id}`}>
+            <Link className="homeworkCardLink" to={`/homework/${homeworkReducer.homework_id}/${homeworkReducer.class_id}`}>
                 <p className="homeworkCardTitle">{homeworkReducer.title}</p>
                 <p className="homeworkCardInfo">{homeworkReducer.subject}</p>
                 <p className="homeworkCardInfo">{homeworkReducer.class_code}</p>
                 <p className="homeworkCardInfo">{"Due " + displayDate()}</p>
             </Link>
-            {completed ?
-                <button disabled={expired} onClick={() => {markComplete()}}>Mark Incomplete</button>
-            :
-                <button disabled={expired} onClick={() => {markComplete()}}>Mark Complete</button>
-            }
+            <input className="homeworkCardButton" type="checkbox" checked={completed} disabled={expired} onChange={() => {markComplete()}} />
         </div>
     )
 }

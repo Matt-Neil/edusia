@@ -13,23 +13,46 @@ const createToken = (id) => {
 exports.postLogin = async (req, res, next) => {
     try {
         const user = await db.query("SELECT * FROM users WHERE email = $1", [req.body.email]);
-            
-        if (user.rows.length === 1) {
-            const auth = await bcrypt.compare(req.body.password, user.rows[0].password);
-    
-            if (auth) {
-                const token = createToken(user.rows[0].id);
 
-                res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
-                res.status(201).json({
-                    success: true,
-                    data: user.rows[0]
-                })
-            } else {
-                throw "Wrong Password"
-            }
-        } else {
-            throw "Wrong Email"
+        switch (user.rows.length) {
+            case 0:
+                const school = await db.query("SELECT * FROM schools WHERE email = $1", [req.body.email]);
+
+                if (school.rows.length === 1) {
+                    const auth = await bcrypt.compare(req.body.password, school.rows[0].password);
+    
+                    if (auth) {
+                        const token = createToken(school.rows[0].id);
+    
+                        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
+                        res.status(201).json({
+                            success: true,
+                            data: school.rows[0]
+                        })
+                    } else {
+                        throw "Wrong Password"
+                    }
+                } else {
+                    throw "Wrong Email"
+                }
+                break;
+            case 1:
+                const auth = await bcrypt.compare(req.body.password, user.rows[0].password);
+    
+                if (auth) {
+                    const token = createToken(user.rows[0].id);
+
+                    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 })
+                    res.status(201).json({
+                        success: true,
+                        data: user.rows[0]
+                    })
+                } else {
+                    throw "Wrong Password"
+                }
+                break;
+            default:
+                throw "Wrong Email"
         }
     } catch (err) {
         res.status(500).json({

@@ -2,6 +2,7 @@ import React, {useState, useContext} from 'react'
 import authAPI from "../API/auth"
 import { CurrentUserContext } from '../Contexts/currentUserContext';
 import { MessageContext } from '../Contexts/messageContext';
+import MessageCard from '../Components/MessageCard'
 
 const LogIn = () => {
     const [login, setLogin] = useState(true);
@@ -75,41 +76,30 @@ const LogIn = () => {
     }
     
     return (
-        <>
+        <div className="loginBody">
+            <p className="titleExpanded">Edusia</p>
             {login ?
-                <>
-                    <div className="mainBody">
-                        <form className="loginBody" method="POST" onSubmit={loginUser}>
-                            <div className="multipleInput">
-                                <input className="textInputLogin text5" type="text" name="email" placeholder="Email" value={loginEmail} onChange={e => {setLoginEmail(e.target.value)}} />
-                                <input className="textInputLogin text5" type="password" name="password" placeholder="Password" value={loginPassword} onChange={e => {setLoginPassword(e.target.value)}} />
-                            </div>
-                            <div className="formSubmit">
-                                <input className="loginButton text4" type="submit" value="Log in" />
-                            </div>
-                        </form>
+                <form method="POST" onSubmit={loginUser}>
+                    <div>
+                        <input className="textInput" type="text" name="email" placeholder="Email" value={loginEmail} onChange={e => {setLoginEmail(e.target.value)}} />
+                        <input className="textInput" type="password" name="password" placeholder="Password" value={loginPassword} onChange={e => {setLoginPassword(e.target.value)}} />
                     </div>
-                    <button onClick={() => {setLogin(false)}}>Register School</button>
-                </>
+                    <input className="buttonBlue" type="submit" value="Log in" />
+                    <button className="buttonOrange" type="button" onClick={() => {setLogin(false)}}>Register School</button>
+                </form>
             :
-                <>
-                    <div className="mainBody">
-                        <form className="loginBody" method="POST" onSubmit={newSchool}>
-                            <div className="multipleInput">
-                                <input className="textInputLogin text5" type="text" name="name" placeholder="School Name" value={name} onChange={e => {setName(e.target.value)}} />
-                                <input className="textInputLogin text5" type="text" name="email" placeholder="Email" value={email} onChange={e => {setEmail(e.target.value)}} />
-                                <input className="textInputLogin text5" type="password" name="password" placeholder="Password" value={password} onChange={e => {setPassword(e.target.value)}} />
-                            </div>
-                            <div className="formSubmit">
-                                <input className="loginButton text4" type="submit" value="Register School" />
-                            </div>
-                        </form>
+                <form method="POST" onSubmit={newSchool}>
+                    <div>
+                        <input className="textInput" type="text" name="name" placeholder="School Name" value={name} onChange={e => {setName(e.target.value)}} />
+                        <input className="textInput" type="text" name="email" placeholder="Email" value={email} onChange={e => {setEmail(e.target.value)}} />
+                        <input className="textInput" type="password" name="password" placeholder="Password" value={password} onChange={e => {setPassword(e.target.value)}} />
                     </div>
-                    <button onClick={() => {setLogin(true)}}>Login</button>
-                </>
+                    <input className="buttonBlue" type="submit" value="Register School" />
+                    <button className="buttonOrange" type="button" onClick={() => {setLogin(true)}}>Already Have an Account?</button>
+                </form>
             }
-            {displayErrorMessage && <p>{error}</p>}
-        </>
+            {displayErrorMessage && <MessageCard message={error} />}
+        </div>
     )
 }
 

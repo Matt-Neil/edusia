@@ -4,9 +4,11 @@ import classesAPI from "../API/classes"
 import searchAPI from "../API/search"
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
+import MessageCard from '../Components/MessageCard'
 
 const AddClass = ({currentUser}) => {
     const [teacher_id, setTeacher_id] = useState("");
+    const [teacherName, setTeacherName] = useState("");
     const [subject, setSubject] = useState("");
     const [class_code, setClass_code] = useState("");
     const [searchTeacher, setSearchTeacher] = useState("");
@@ -34,6 +36,7 @@ const AddClass = ({currentUser}) => {
 
                 setSubject("");
                 setTeacher_id("");
+                setTeacherName("");
                 setClass_code("");
                 setStudents([]);
                 setSearchStudent("");
@@ -55,6 +58,11 @@ const AddClass = ({currentUser}) => {
         setStudents(students.filter(item => item !== student));
     }
 
+    const addTeacher = (results) => {
+        setTeacherName(`${results.name} (${results.username})`);
+        setTeacher_id(results.id);
+    }
+
     const searchTeachers = async () => {
         const results = await searchAPI.get(`/${currentUser.id}/teachers?phrase=${searchTeacher}`);
 
@@ -69,7 +77,7 @@ const AddClass = ({currentUser}) => {
 
     return (
         <>
-            <Header path={[{text: "Home", link: ""}, "Add Class"]} />
+            <Header path={[{text: "Home", link: "/"}, "Add Class"]} />
             <div className="toolbar">
                 <Link to={`/home/add-student`}>Add Student</Link>
                 <Link to={`/home/add-teacher`}>Add Teacher</Link>
@@ -86,7 +94,7 @@ const AddClass = ({currentUser}) => {
                         return (
                             <div key={i}>
                                 <p>{results.name}</p>
-                                <button type="button" onClick={() => {setTeacher_id(results.id)}}>Add</button>
+                                <button type="button" onClick={() => {addTeacher(results)}}>Add</button>
                             </div>
                         )
                     })}
@@ -96,7 +104,7 @@ const AddClass = ({currentUser}) => {
                         return (
                             <div key={i}>
                                 <p>{results.name}</p>
-                                <button type="button" onClick={() => {appendStudent(results.id)}}>Add</button>
+                                <button type="button" onClick={() => {appendStudent(results)}}>Add</button>
                             </div>
                         )
                     })}
@@ -105,17 +113,17 @@ const AddClass = ({currentUser}) => {
                     <input className="loginButton text4" type="submit" value={`Add Class`} />
                 </div>
             </form>
-            <p>{"Teacher: " + teacher_id}</p>
+            <p>{`Teacher: ${teacherName}`}</p>
             {students && students.map((student, i) => {
                 return (
                     <div key={i}>
-                        <p>{student}</p>
+                        <p>{student.name}</p>
                         <button type="button" onClick={() => {removeStudent(student)}}>Remove</button>
                     </div>
                 )
             })}
-            {displayAddedMessage && <p>Added</p>}
-            {displayErrorMessage && <p>{error}</p>}
+            {displayAddedMessage && <MessageCard message={"Added"} />}
+            {displayErrorMessage && <MessageCard message={error} />}
         </>
     )
 }

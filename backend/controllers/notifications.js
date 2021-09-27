@@ -19,8 +19,8 @@ exports.getNotificationsStudent = async (req, res, next) => {
 
 exports.getNotificationsClass = async (req, res, next) => {
     try {
-        const notifications = await db.query("SELECT notifications.id, notifications.expire, notifications.notification FROM notifications INNER JOIN classes ON classes.id = notifications.class_id AND classes.id = $1 AND (classes.school_id = $2 OR classes.school_id = $3) AND notifications.expire > $4 AND notifications.expire > $5 ORDER BY notifications.expire ASC LIMIT 10", 
-            [req.params.id, res.locals.currentUser.school_id, res.locals.currentUser.id, new Date(req.query.date), new Date().toISOString()]); 
+        const notifications = await db.query("SELECT notifications.id, notifications.expire, notifications.notification FROM notifications INNER JOIN classes ON classes.id = notifications.class_id AND classes.id = $1 AND (classes.school_id = $2 OR classes.school_id = $3) AND notifications.expire > $4 AND notifications.expire > $5 ORDER BY notifications.expire ASC LIMIT $6", 
+            [req.params.id, res.locals.currentUser.school_id, res.locals.currentUser.id, new Date(req.query.date), new Date().toISOString(), req.query.length]); 
 
         res.status(201).json({
             success: true,

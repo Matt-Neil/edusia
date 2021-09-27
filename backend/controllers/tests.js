@@ -20,8 +20,8 @@ exports.updateTestGrades = async (req, res, next) => {
 
 exports.getTests = async (req, res, next) => {
     try {
-        const tests = await db.query("SELECT tests.title, tests.date FROM tests INNER JOIN classes ON classes.id = tests.class_id AND classes.id = $1 AND (classes.school_id = $2 OR classes.school_id = $3) AND tests.date > $3 ORDER BY tests.date ASC LIMIT 10", 
-            [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id, new Date(req.query.date)]);
+        const tests = await db.query("SELECT tests.title, tests.date, tests.id FROM tests INNER JOIN classes ON classes.id = tests.class_id AND classes.id = $1 AND (classes.school_id = $2 OR classes.school_id = $3) AND tests.date > $4 ORDER BY tests.date ASC LIMIT $5", 
+            [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id, new Date(req.query.date), req.query.length]);
         
         res.status(201).json({
             success: true,
@@ -80,12 +80,11 @@ exports.updateTest = async (req, res, next) => {
 
 exports.deleteTest = async (req, res, next) => {
     try {
-        const lesson = await db.query("SELECT classes.subject, classes.class_code, users.name, users.picture, users.email, users.username FROM classes INNER JOIN users ON classes.id = $1 AND (classes.school_id = $2 OR classes.teacher_id = $2) AND users.id = classes.teacher_id", 
-            [req.params.id, res.locals.currentUser.id]);
+        await db.query("DELETE FROM tests WHERE id = $1",
+            [req.params.id])
         
         res.status(201).json({
-            success: true,
-            data: lesson.rows[0]
+            success: true
         })
     } catch (err) {
         console.log(err)

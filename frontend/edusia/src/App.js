@@ -105,7 +105,7 @@ export default function App() {
                     <User currentUser={currentUser} />
                   </Route>
                   <Route exact path="/settings">
-                    <Settings />
+                    <Settings currentUser={currentUser} />
                   </Route>
                   <Route exact path="/home">
                     <Home currentUser={currentUser} />

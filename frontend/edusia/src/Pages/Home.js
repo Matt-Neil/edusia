@@ -11,6 +11,7 @@ import { CompletedContext } from '../Contexts/completedContext';
 import { ExpiredContext } from '../Contexts/expiredContext';
 import { MessageContext } from '../Contexts/messageContext';
 import Header from "../Components/Header"
+import MessageCard from "../Components/MessageCard"
 
 const Home = ({currentUser}) => {
     const [homework, setHomework] = useState([]);
@@ -21,7 +22,8 @@ const Home = ({currentUser}) => {
     const [searchPhrase, setSearchPhrase] = useState("");
     const [displaySearch, setDisplaySearch] = useState(false);
     const [loaded, setLoaded] = useState(false);
-    const [options, setOptions] = useState("students");
+    const [displayOptions, setDisplayOptions] = useState("students");
+    const [searchOptions, setSearchOptions] = useState("students");
     const [finishedHomework, setFinishedHomework] = useState(false);
     const [finishedSearch, setFinishedSearch] = useState(false);
     const [finishedStudents, setFinishedStudents] = useState(false);
@@ -157,7 +159,7 @@ const Home = ({currentUser}) => {
     const loadMoreSearch = async () => {
         if (currentUser.position === "school" && searchResults.length !== 0 && !finishedSearch) {
             try {
-                const results = await searchAPI.get(`?phrase=${searchPhrase}&type=${options}&id=${searchResults[searchResults.length-1].id}`);
+                const results = await searchAPI.get(`?phrase=${searchPhrase}&type=${searchOptions}&id=${searchResults[searchResults.length-1].id}`);
     
                 if (results.data.data.length < 10) {
                     setFinishedSearch(true);
@@ -174,7 +176,11 @@ const Home = ({currentUser}) => {
         e.preventDefault();
 
         try {
-            const results = await searchAPI.get(`?phrase=${searchPhrase}&type=${options}`);
+            const results = await searchAPI.get(`?phrase=${searchPhrase}&type=${searchOptions}`);
+
+            if (results.data.data.length < 10) {
+                setFinishedSearch(true);
+            }
 
             setSearchResults(results.data.data);
             setDisplaySearch(true);
@@ -204,12 +210,17 @@ const Home = ({currentUser}) => {
                     {currentUser.position === "student" &&
                         <>
                             <div className="toolbar">
-                                <input type="checkbox" checked={completed} onChange={() => {changeCompleted()}} />
-                                <label>Show Completed</label>
-                                <input type="checkbox" checked={expired} onChange={() => {changeExpired()}} />
-                                <label>Show Expired</label>
+                                <div className="toolbarItem">
+                                    <input type="checkbox" checked={completed} onChange={() => {changeCompleted()}} />
+                                    <label className="checkboxLabel">Show Completed</label>
+                                </div>
+                                <div className="toolbarItem">
+                                    <input type="checkbox" checked={expired} onChange={() => {changeExpired()}} />
+                                    <label className="checkboxLabel">Show Expired</label>
+                                </div>
                             </div>
                             <div className="innerBody">
+                                <p className="pageTitle">Homework</p>
                                 {completed && expired &&
                                     <>
                                         { homework && homework.map((homeworkReducer, i) => {
@@ -249,6 +260,7 @@ const Home = ({currentUser}) => {
                     {currentUser.position === "teacher" &&
                         <>
                             <div className="innerBody">
+                                <p className="pageTitle">Classes</p>
                                 <div className="userPageRows">
                                     { classes && classes.map((classesReducer, i) => {
                                         return <ClassCard classesReducer={classesReducer} key={i} />
@@ -260,32 +272,37 @@ const Home = ({currentUser}) => {
                     {currentUser.position === "school" &&
                         <>
                             <div className="toolbar">
-                                <Link to={`/home/add-student`}>Add Student</Link>
-                                <Link to={`/home/add-teacher`}>Add Teacher</Link>
-                                <Link to={`/home/add-class`}>Add Class</Link>
-                                <select onChange={e => {setOptions(e.target.value)}}>
-                                    <option value="students">Students</option>
-                                    <option value="teachers">Teachers</option>
-                                    <option value="classes">Classes</option>
-                                </select>
-                                <button onClick={() => {cancelSearch()}}>Cancel Search</button>
-                                <form className="loginBody" method="POST" onSubmit={search}>
-                                    <div className="multipleInput">
-                                        <input className="textInputLogin text5" type="text" name="searchPhrase" placeholder="Search for students, teachers or classes..." value={searchPhrase} onChange={e => {setSearchPhrase(e.target.value)}} />
-                                    </div>
-                                    <div className="formSubmit">
-                                        <input className="loginButton text4" type="submit" value="Search" />
-                                    </div>
+                                <div className="toolbarLeft">
+                                    <button className="buttonBlue toolbarItem">Add Student</button>
+                                    <button className="buttonBlue toolbarItem">Add Teacher</button>
+                                    <button style={{margin: "0 10px 0 25px"}} className="buttonBlue toolbarItem">Add Class</button>
+                                    <select className="select" onChange={e => {setDisplayOptions(e.target.value)}}>
+                                        <option value="students">View Students</option>
+                                        <option value="teachers">View Teachers</option>
+                                        <option value="classes">View Classes</option>
+                                    </select>
+                                </div>
+                                <form className="searchPair toolbarItem" method="POST" onSubmit={search}>
+                                    <input style={{margin: "0 10px 0 0"}} className="searchInput" type="text" name="searchPhrase" placeholder="Search for students, teachers or classes..." value={searchPhrase} onChange={e => {setSearchPhrase(e.target.value)}} />
+                                    <input style={{margin: "0 10px 0 0"}} className="buttonBlue" type="submit" value="Search" />
+                                    <button style={{margin: "0 10px 0 0"}} type="button" className="buttonOrange" onClick={() => {cancelSearch()}}>Cancel Search</button>
                                 </form>
+                                <select style={{margin: "0 25px 0 0"}} className="select" onChange={e => {setSearchOptions(e.target.value)}}>
+                                    <option value="students">Search Students</option>
+                                    <option value="teachers">Search Teachers</option>
+                                    <option value="all">Search All Users</option>
+                                    <option value="classes">Search Classes</option>
+                                </select>
                             </div>
                             <div className="innerBody">
+                                <p className="pageTitle">Dashboard</p>
                                 {displaySearch ?
                                     <>
-                                        {options === "students" &&
+                                        {displayOptions === "students" &&
                                             <>
                                                 <div className="userPageRows">
                                                     { searchResults && searchResults.map((userReducer, i) => {
-                                                        return <UserCard userReducer={userReducer} key={i} />
+                                                        return <UserCard user={userReducer} key={i} />
                                                     })}
                                                 </div>
                                                 <div className="finished">
@@ -295,11 +312,11 @@ const Home = ({currentUser}) => {
                                                 </div>
                                             </>
                                         }
-                                        {options === "teachers" &&
+                                        {displayOptions === "teachers" &&
                                             <>
                                                 <div className="userPageRows">
                                                     { searchResults && searchResults.map((userReducer, i) => {
-                                                        return <UserCard userReducer={userReducer} key={i} />
+                                                        return <UserCard user={userReducer} key={i} />
                                                     })}
                                                 </div>
                                                 <div className="finished">
@@ -309,11 +326,11 @@ const Home = ({currentUser}) => {
                                                 </div>
                                             </>
                                         }
-                                        {options === "classes" &&
+                                        {displayOptions === "classes" &&
                                             <>
                                                 <div className="userPageRows">
                                                     { searchResults && searchResults.map((userReducer, i) => {
-                                                        return <ClassCard userReducer={userReducer} key={i} />
+                                                        return <ClassCard user={userReducer} key={i} />
                                                     })}
                                                 </div>
                                                 <div className="finished">
@@ -326,11 +343,11 @@ const Home = ({currentUser}) => {
                                     </>
                                 :
                                     <>
-                                        {options === "students" &&
+                                        {displayOptions === "students" &&
                                             <>
                                                 <div className="userPageRows">
                                                     { students && students.map((userReducer, i) => {
-                                                        return <UserCard userReducer={userReducer} key={i} />
+                                                        return <UserCard user={userReducer} key={i} />
                                                     })}
                                                 </div>
                                                 <div className="finished">
@@ -340,11 +357,11 @@ const Home = ({currentUser}) => {
                                                 </div>
                                             </>
                                         }
-                                        {options === "teachers" &&
+                                        {displayOptions === "teachers" &&
                                             <>
                                                 <div className="userPageRows">
                                                     { teachers && teachers.map((userReducer, i) => {
-                                                        return <UserCard userReducer={userReducer} key={i} />
+                                                        return <UserCard user={userReducer} key={i} />
                                                     })}
                                                 </div>
                                                 <div className="finished">
@@ -354,7 +371,7 @@ const Home = ({currentUser}) => {
                                                 </div>
                                             </>
                                         }
-                                        {options === "classes" &&
+                                        {displayOptions === "classes" &&
                                             <>
                                                 <div className="userPageRows">
                                                     { classes && classes.map((classesReducer, i) => {
@@ -373,7 +390,7 @@ const Home = ({currentUser}) => {
                             </div>
                         </>
                     }
-                    {displayErrorMessage && <p>{error}</p>}
+                    {displayErrorMessage && <MessageCard message={error} />}
                 </>
             }
         </>

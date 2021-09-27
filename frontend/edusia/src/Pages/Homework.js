@@ -4,6 +4,7 @@ import fileAPI from "../API/file"
 import { Link, useParams, useHistory } from 'react-router-dom';
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
+import MessageCard from '../Components/MessageCard'
 const moment = require('moment');
 
 const Homework = ({currentUser}) => {
@@ -26,9 +27,15 @@ const Homework = ({currentUser}) => {
                 const homework = await homeworkAPI.get(`/${homeworkID}`);
                 const submissions = await homeworkAPI.get(`/${homeworkID}/submissions`);
 
-                setHomework(homework.data.data);
-                setSubmissions(submissions.data.data);
-                setLoaded(true);
+                if (homework.data.data) {
+                    setHomework(homework.data.data);
+                    setSubmissions(submissions.data.data);
+                    setLoaded(true);
+                } else {
+                    history.replace("/home");
+                }
+
+                
             } catch (err) {
                 displayMessageErrorInterval("Error Loading Page")
             }
@@ -149,25 +156,27 @@ const Homework = ({currentUser}) => {
         <>
             {loaded &&
                 <>
-                    <Header path={[{text: "Home", link: ""}, {text: `Class ${homework.class_code}`, link: `/class/${classID}`}, homework.title]} />
-                    <div className="toolbar">
-                        {currentUser.position === "student" &&
-                            <>
-                                {completed ?
-                                    <button disabled={expired} onClick={() => {markComplete()}}>Mark Incomplete</button>
-                                :
-                                    <button disabled={expired} onClick={() => {markComplete()}}>Mark Complete</button>
-                                }
-                                <button disabled={expired} onClick={() => {setAdjustSubmission(true)}}>Add Submission</button>
-                            </>
-                        }
-                        {currentUser.position === "teacher" &&
-                            <>
-                                <Link to={`edit-homework/${homeworkID}`}>Edit Homework</Link>
-                                <button onClick={() => {deleteHomework()}}>Delete Homework</button>
-                            </>
-                        }
-                    </div>
+                    <Header path={[{text: "Home", link: "/"}, `Class ${homework.class_code}`]} />
+                    {currentUser.position !== "school" &&
+                        <div className="toolbar">
+                            {currentUser.position === "student" &&
+                                <>
+                                    {completed ?
+                                        <button disabled={expired} onClick={() => {markComplete()}}>Mark Incomplete</button>
+                                    :
+                                        <button disabled={expired} onClick={() => {markComplete()}}>Mark Complete</button>
+                                    }
+                                    <button disabled={expired} onClick={() => {setAdjustSubmission(true)}}>Add Submission</button>
+                                </>
+                            }
+                            {currentUser.position === "teacher" &&
+                                <>
+                                    <Link to={`edit-homework/${homeworkID}`}>Edit Homework</Link>
+                                    <button onClick={() => {deleteHomework()}}>Delete Homework</button>
+                                </>
+                            }
+                        </div>
+                    }
                     <div className="innerBody">
                         <p>{homework.class}</p>
                         <p>{homework.subject}</p>
@@ -224,8 +233,8 @@ const Homework = ({currentUser}) => {
                             </>
                         }
                     </div>
-                    {displayAddedMessage && <p>Added</p>}
-                    {displayErrorMessage && <p>{error}</p>}
+                    {displayAddedMessage && <MessageCard message={"Added"} />}
+                    {displayErrorMessage && <MessageCard message={error} />}
                 </>
             }
         </>

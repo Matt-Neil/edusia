@@ -135,7 +135,7 @@ exports.getSubmissions = async (req, res, next) => {
         let submissions;
 
         if (res.locals.currentUser.position === "student") {
-            submissions = await db.query("SELECT students_homework.submission, students_homework.completed FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND students_homework.student_id = users.id AND students_homework.student_id = $2 AND users.school_id = $3",
+            submissions = await db.query("SELECT students_homework.submission, students_homework.completed, students_homework.completed FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND students_homework.student_id = users.id AND students_homework.student_id = $2 AND users.school_id = $3",
                 [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id]);
 
             res.status(201).json({
@@ -143,7 +143,7 @@ exports.getSubmissions = async (req, res, next) => {
                 data: submissions.rows[0]
             })
         } else {
-            submissions = await db.query("SELECT students_homework.submission, users.id, user.picture, users.name, users.username FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND users.id = students_homework.student_id AND (users.school_id = $2 OR users.school_id = $3)",
+            submissions = await db.query("SELECT students_homework.submission, students_homework.completed, users.id, users.picture, users.name, users.username FROM students_homework INNER JOIN users ON students_homework.homework_id = $1 AND users.id = students_homework.student_id AND (users.school_id = $2 OR users.school_id = $3)",
                 [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id]);
             
             res.status(201).json({
@@ -152,6 +152,7 @@ exports.getSubmissions = async (req, res, next) => {
             })
         }
     } catch (err) {
+        console.log(err)
         res.status(500).json({
             success: false,
             error: 'Server Error'

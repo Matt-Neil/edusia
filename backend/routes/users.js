@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getStudentsSchool, getTeachersSchool, getUserEdit, postUser, putUser, deleteUser, getSettings, putSettings, getDetentions, getNotifications,
     getStudentsLesson, getStudentLesson, getUser, getStudentNotes, getStudentDetentions, postStudentNotes, putStudentNotes, deleteStudentNotes,
-    postStudentDetentions, putStudentDetentions, deleteStudentDetentions } = require('../controllers/users');
+    postStudentDetentions, putStudentDetentions, deleteStudentDetentions, deleteSchool } = require('../controllers/users');
 
 router.route('/settings').get(getSettings).put(putSettings);
 
@@ -22,8 +22,8 @@ router.route('/students/:id/school').get(getStudentsSchool);
 
 router.route('/teachers/:id/school').get(getTeachersSchool);
 
-router.route('/:id/edit').get(getUserEdit).post(postUser).put(putUser).delete(deleteUser);
+router.route('/:id/edit').get(getUserEdit).put(putUser).delete(deleteUser);
 
-router.route('/:id').get(getUser);
+router.route('/:id').get(getUser).post(postUser).delete(deleteSchool);
 
 module.exports = router

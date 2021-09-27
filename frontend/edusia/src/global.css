@@ -4,6 +4,33 @@ body {
     margin: 0;
     background-color: #F2F3F7;
 }
+p {
+  font-family: 'Inter', sans-serif
+}
+label {
+  font-family: 'Inter', sans-serif
+}
+input {
+  font-family: 'Inter', sans-serif
+}
+textarea {
+  font-family: 'Inter', sans-serif
+}
+select {
+  font-family: 'Inter', sans-serif
+}
+::-webkit-input-placeholder {
+  font-family: 'Inter', sans-serif
+}
+::-moz-placeholder {
+  font-family: 'Inter', sans-serif
+}
+:-ms-input-placeholder {
+  font-family: 'Inter', sans-serif
+}
+:-moz-placeholder {
+  font-family: 'Inter', sans-serif
+}
 .wholeBody {
   display: flex;
   height: 100vh;
@@ -13,6 +40,36 @@ body {
 }
 .innerBody {
   margin: 0 25px 25px 25px;
+}
+.checkboxLabel {
+  margin: 0 0 0 7px;
+}
+.settingsPicture {
+  margin: 25px 0 0 0;
+  width: 250px;
+  height: 250px;
+}
+.pictureInput {
+  margin: 0 0 20px 0;
+}
+.textInput {
+  margin: 25px 0 15px 0;
+  padding: 0 15px;
+  width: 220px;
+  border-radius: 15px;
+  height: 40px;
+  border: none;
+  outline-style: none;
+}
+.textAreaInput {
+  margin: 25px 0 15px 0;
+  padding: 10px 15px;
+  width: 450px;
+  border-radius: 15px;
+  height: fit-content;
+  border: none;
+  outline-style: none;
+  resize: none;
 }
 .sideBarExpanded {
   display: flex;
@@ -52,19 +109,20 @@ body {
   height: 170px;
   border-bottom: 1px #EAEBEE solid;
 }
-.userPictureExpanded {
+.currentUserPictureExpanded {
   width: 100px;
   height: 100px;
   margin: 35px 25px;
   border-radius: 50px;
 }
-.userPictureCollapsed {
+.currentUserPictureCollapsed {
   width: 40px;
   height: 40px;
   margin: 35px 20px;
   border-radius: 50px;
 }
-.userName {
+.currentUserName {
+  margin: 0 25px 0 0;
   font-family: 'Inter', sans-serif;
   font-size: 18px;
   color: white;
@@ -97,6 +155,12 @@ body {
   bottom: 20px;
   cursor: pointer;
 }
+.pageTitle {
+  margin: 25px 0 10px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
 .header {
   display: flex;
   align-items: center;
@@ -105,11 +169,23 @@ body {
   border-bottom: 1px #EAEBEE solid;
 }
 .headerLocation {
-  margin: 0 0 0 25px;
+  margin: 0 25px 0 25px;
   font-family: 'Inter', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
+  color: #2B2B2B;
+  font-weight: 500;
+}
+.headerPath {
+  margin: 0 25px 0 25px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
   color: #2B2B2B;
   font-weight: 300;
+  text-decoration: none;
+}
+.headerPair {
+  display: flex;
+  align-items: center;
 }
 .toolbar {
   display: flex;
@@ -118,6 +194,42 @@ body {
   height: 60px;
   background-color: #FBFBFB;
   border-bottom: 1px #EAEBEE solid;
+}
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.toolbarItem {
+  display: flex;
+  align-items: center;
+  margin: 0 0 0 25px;
+}
+.buttonBlue {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  border: none;
+  height: 35px;
+  padding: 0 15px;
+  color: white;
+  width: fit-content;
+  border-radius: 15px;
+  background-color: #287AC9;
+  cursor: pointer;
+  text-decoration: none;
+}
+.buttonOrange {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  border: none;
+  height: 35px;
+  padding: 0 15px;
+  color: white;
+  width: fit-content;
+  border-radius: 15px;
+  background-color: #F36543;
+  cursor: pointer;
+  text-decoration: none;
 }
 .homeworkCard {
   display: flex;
@@ -129,7 +241,18 @@ body {
   color: #2b2b2b;
   background-color: white;
   border-radius: 15px;
+}
+.homeworkCardLink {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100px;
+  color: #2b2b2b;
+  border-radius: 15px 0 0 15px;
   text-decoration: none;
+}
+.homeworkCardButton {
+  margin: 0 25px 0 50px;
 }
 .homeworkCardTitle {
   margin: 0 25px;
@@ -159,14 +282,17 @@ body {
   display: flex;
   flex-wrap: wrap;
 }
+.displayCardsRow {
+  display: flex;
+  flex-wrap: wrap;
+}
 .classCard {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 150px;
-  height: 150px;
-  margin: 25px 0;
+  width: 250px;
+  height: fit-content;
+  margin: 25px 25px 0 0;
   color: #2b2b2b;
   background-color: white;
   border-radius: 15px;
@@ -178,11 +304,304 @@ body {
   font-size: 18px;
   font-weight: 400;
 }
-.classCardInfo {
-  position: absolute;
-  bottom: 0;
+.detentionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 200px;
+  height: 150px;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.detentionCardTitle {
   margin: 20px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.detentionCardInfo {
+  margin: 10px 0;
   font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 200;
+}
+.notificationCard {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  height: fit-content;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.notificationCardHeader {
+  display: flex;
+  align-items: center;
+  margin: 0 20px;
+}
+.notificationCardTitle {
+  margin: 20px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.notificationCardText {
+  margin: 0 20px 20px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+}
+.notificationCardInfo {
+  margin: 20px 0 20px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: black;
+  font-weight: 200;
+}
+.userCard {
+  display: flex;
+  align-items: center;
+  width: 350px;
+  height: 110px;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.userCardTitle {
+  margin: 20px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.userCardPicture {
+  margin: 0 20px 0 20px;
+  width: 70px;
+  height: 70px;
+  border-radius: 35px;
+}
+.homeworkCardClass {
+  display: flex;
+  align-items: center;
+  width: 600px;
+  height: fit-content;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.homeworkCardClassTitle {
+  margin: 20px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.homeworkCardClassInfo {
+  margin: 20px 20px 20px auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: black;
+  font-weight: 200;
+}
+.homeworkCardClassBox {
+  flex: 1;
+}
+.testCard {
+  display: flex;
+  align-items: center;
+  width: 600px;
+  height: fit-content;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.testCardTitle {
+  margin: 20px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.testCardInfo {
+  margin: 20px 20px 20px auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: black;
+  font-weight: 200;
+}
+.testCardBox {
+  flex: 1;
+}
+.cardPair {
+  display: flex;
+  align-items: center;
+}
+.notificationCardClass {
+  display: flex;
+  align-items: center;
+  width: 600px;
+  height: fit-content;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.notificationCardClassTitle {
+  margin: 20px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.notificationCardClassInfo {
+  margin: 20px 20px 20px auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: black;
+  font-weight: 200;
+}
+.notificationCardClassBox {
+  flex: 1;
+}
+.formSubmit {
+  margin: 15px 0 0 0;
+}
+.select {
+  padding: 7px;
+  border-radius: 5px;
+  width: 150px;
+}
+.searchInput {
+  padding: 0 15px;
+  width: 275px;
+  border-radius: 5px;
+  height: 35px;
+  border: 1px #767676 solid;
+  outline-style: none;
+}
+.searchPair {
+  display: flex;
+  align-items: center;
+}
+.userBox {
+  display: flex;
+  margin: 25px 0 0 0;
+}
+.userInfo {
+  margin: -15px 0 0 0;
+}
+.userPicture {
+  width: 250px;
+  height: 250px;
+  margin: 0 25px 0 0;
+}
+.userName {
+  font-size: 18px;
+  font-weight: 400;
+}
+.userEmail {
+  font-size: 16px;
+  font-weight: 300;
+}
+.classInfo {
+  display: flex;
+}
+.classInfoItem {
+  margin: 25px 25px 0 0;
+  font-family: 'Inter', sans-serif;
+  color: #2b2b2b;
+  text-decoration: none;
+}
+.detentionCardClass {
+  display: flex;
+  align-items: center;
+  width: 600px;
+  height: fit-content;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.detentionCardClassTitle {
+  margin: 20px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.detentionCardClassInfo {
+  margin: 20px 20px 20px auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: black;
+  font-weight: 200;
+}
+.detentionCardClassBox {
+  flex: 1;
+}
+.noteCard {
+  display: flex;
+  align-items: center;
+  width: 600px;
+  height: fit-content;
+  margin: 25px 25px 0 0;
+  color: #2b2b2b;
+  background-color: white;
+  border-radius: 15px;
+  text-decoration: none;
+}
+.noteCardTitle {
+  margin: 20px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.noteCardInfo {
+  margin: 20px 20px 20px auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: black;
+  font-weight: 200;
+}
+.noteCardBox {
+  flex: 1;
+}
+.messageCard {
+  height: 50px;
+  width: fit-content;
+  min-width: 100px;
+  background-color: white;
+  border-radius: 15px;
+  padding: 0 20px;
+  position: relative;
+  margin: 0 auto;
+  bottom: 0;
+}
+.messageCardText {
+  text-align: center;
+  line-height: 48px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+.finished {
+  padding: 25px 0 25px 0;
+  width: fit-content;
+  min-width: fit-content;
+  position: relative;
+  margin: 0 auto;
+  bottom: 0;
+}
+.loginBody {
+  width: 600px;
+  background-color: #142843;
+  border-radius: 20px;
 }

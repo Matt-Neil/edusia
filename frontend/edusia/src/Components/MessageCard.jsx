@@ -1,9 +1,9 @@
 import React from 'react'
 
-const MessageCard = () => {
+const MessageCard = ({message}) => {
     return (
-        <div>
-            
+        <div className="messageCard">
+            <p className="messageCardText">{message}</p>
         </div>
     )
 }

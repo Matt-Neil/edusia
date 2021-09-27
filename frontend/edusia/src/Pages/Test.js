@@ -1,10 +1,12 @@
 import React, {useState, useEffect, useContext} from 'react'
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import testsAPI from "../API/tests"
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
+import MessageCard from '../Components/MessageCard'
+import StudentCard from '../Components/StudentCard'
 
-const Test = ({currentUser}) => {
+const Test = () => {
     const [loaded, setLoaded] = useState(false);
     const [students, setStudents] = useState();
     const [edit, setEdit] = useState([]);
@@ -14,24 +16,29 @@ const Test = ({currentUser}) => {
     const classID = useParams().class;
     const testID = useParams().id;
     const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
+    const history = useHistory()
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await testsAPI.get(`/${testID}?class=${classID}`)
+                const test = await testsAPI.get(`/${testID}?class=${classID}`)
 
-                for (let i = 0; i < response.data.data.students.length; i++) {
-                    setGrades(previousState => Object.assign([], previousState, {[i]: response.data.data.students[i].grade}))
+                if (test.data.data) {
+                    for (let i = 0; i < test.data.data.students.length; i++) {
+                        setGrades(previousState => Object.assign([], previousState, {[i]: test.data.data.students[i].grade}))
+                    }
+
+                    for (let i = 0; i < test.data.data.students.length; i++) {
+                        setUpdateGrades(previousState => Object.assign([], previousState, {[i]: test.data.data.students[i].grade}))
+                    }
+
+                    setEdit(new Array(test.data.data.students.length).fill(false));
+                    setStudents(test.data.data.students);
+                    setTest(test.data.data.test);
+                    setLoaded(true);
+                } else {
+                    history.replace("/home");
                 }
-
-                for (let i = 0; i < response.data.data.students.length; i++) {
-                    setUpdateGrades(previousState => Object.assign([], previousState, {[i]: response.data.data.students[i].grade}))
-                }
-
-                setEdit(new Array(response.data.data.students.length).fill(false));
-                setStudents(response.data.data.students);
-                setTest(response.data.data.test);
-                setLoaded(true);
             } catch (err) {
                 displayMessageErrorInterval("Error Loading Page")
             }
@@ -71,51 +78,37 @@ const Test = ({currentUser}) => {
         <>
             {loaded &&
                 <>
-                    <Header path={[{text: "Home", link: ""}, {text: `Class ${test.class_code}`, link: `/class/${classID}`}, test.title]} />
-                    {students.map((student, i) => {
-                        return (
-                            <div key={i}>
-                                <p>{student.name}</p>
-                                {currentUser.position === "school" &&
-                                    <>
-                                        {student.grade ?
-                                            <p>{student.grade}</p>  
-                                        :
-                                            <p>No Grade</p>  
-                                        }
-                                    </>
-                                }
-                                {currentUser.position === "teacher" &&
-                                    <>
-                                        {edit[i] ?
-                                            <>
-                                                <form className="loginBody" method="PUT" onSubmit={updateGrade} id={i}>
-                                                    <div className="multipleInput">
-                                                        <input className="textInputLogin text5" type="text" name="grade" placeholder="Grade" value={updateGrades[i]} onChange={e => {setUpdateGrades(previousState => Object.assign([], previousState, {[i]: e.target.value}))}} />
-                                                    </div>
-                                                    <div className="formSubmit">
-                                                        <input className="loginButton text4" type="submit" value="Update" />
-                                                    </div>
-                                                </form>
-                                                <button onClick={() => {cancelGrade(i)}}>Cancel</button>
-                                            </>
-                                        :
-                                            <>
-                                                {grades[i] ?
-                                                    <p>{grades[i]}</p>  
-                                                :
-                                                    <p>No Grade</p>  
-                                                }
-                                                <button onClick={() => {setEdit(previousState => Object.assign([], previousState, {[i]: true}))}}>Edit Grade</button>
-                                            </>
-                                        }
-                                    </>
-                                }
-                            </div>
-                        )
-                    })}
-                    {displayUpdatedMessage && <p>Updated</p>}
-                    {displayErrorMessage && <p>{error}</p>}
+                    <Header path={[{text: "Home", link: "/"}, {text: `Class ${test.class_code}`, link: `/class/${classID}`}, test.title]} />
+                    <div className="innerBody">
+                        <p className="pageTitle">Test Results</p>
+                        {students.map((student, i) => {
+                            return (
+                                <div className="cardPair" key={i}>
+                                    <StudentCard user={student} classID={classID} />
+                                    {edit[i] ?
+                                        <>
+                                            <form className="loginBody" method="PUT" onSubmit={updateGrade} id={i}>
+                                                <input style={{margin: "0 15px 0 0"}} className="textInput" type="text" name="grade" placeholder="Grade" value={updateGrades[i]} onChange={e => {setUpdateGrades(previousState => Object.assign([], previousState, {[i]: e.target.value}))}} />
+                                                <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update" />
+                                                <button className="buttonOrange" onClick={() => {cancelGrade(i)}}>Cancel</button>
+                                            </form>
+                                        </>
+                                    :
+                                        <>
+                                            {grades[i] ?
+                                                <p>{grades[i]}</p>  
+                                            :
+                                                <p>No Grade</p>  
+                                            }
+                                            <button style={{margin: "0 0 0 15px"}} className="buttonBlue" onClick={() => {setEdit(previousState => Object.assign([], previousState, {[i]: true}))}}>Update Grade</button>
+                                        </>
+                                    }
+                                </div>
+                            )
+                        })}
+                        {displayUpdatedMessage && <MessageCard message={"Updated"} />}
+                        {displayErrorMessage && <MessageCard message={error} />}
+                    </div>
                 </>
             }
         </>   

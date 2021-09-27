@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router-dom';
 import DatePicker from 'react-datepicker'
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
+import MessageCard from '../Components/MessageCard'
 
 const AddHomework = ({currentUser}) => {
     const [classes, setClasses] = useState();
@@ -27,7 +28,7 @@ const AddHomework = ({currentUser}) => {
                 const students = await usersAPI.get(`/students/${classID}/lesson`);
                 const classes = await classesAPI.get(`/${classID}`);
                 
-                setClasses(classes);
+                setClasses(classes.data.data);
                 setStudents(students.data.data);
                 setLoaded(true);
             } catch (err) {
@@ -110,7 +111,7 @@ const AddHomework = ({currentUser}) => {
         <>
             {loaded &&
                 <>
-                    <Header path={[{text: "Home", link: ""}, {text: `Class ${classes.class_code}`, link: `/class/${classID}`}, "Add Homework"]} />
+                    <Header path={[{text: "Home", link: "/"}, {text: `Class ${classes.class_code}`, link: `/class/${classID}`}, "Add Homework"]} />
                     <div className="toolbar">
                         <Link to={`/class/${classID}`}>Return to Class</Link>
                     </div>
@@ -173,8 +174,8 @@ const AddHomework = ({currentUser}) => {
                             <input className="pictureUpload text4" type="submit" value="Add Homework" />
                         </div>
                     </form>
-                    {displayAddedMessage && <p>Added</p>}
-                    {displayErrorMessage && <p>{error}</p>}
+                    {displayAddedMessage && <MessageCard message={"Added"} />}
+                    {displayErrorMessage && <MessageCard message={error} />}
                 </>
             }
         </>

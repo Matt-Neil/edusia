@@ -91,10 +91,10 @@ exports.getStudentLesson = async (req, res, next) => {
         let student;
 
         if (res.locals.currentUser.position === "teacher") {
-            student = await db.query("SELECT users.name, users.picture, users.username, users.email, users.id FROM users INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = $2 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $2 AND classes.school_id = $3",
+            student = await db.query("SELECT users.name, users.picture, users.username, users.email, users.id, classes.class_code FROM users INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = $2 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $2 AND classes.school_id = $3",
                 [req.params.id, req.query.class, res.locals.currentUser.school_id]);
         } else {
-            student = await db.query("SELECT users.name, users.picture, users.username, users.email, users.id FROM users INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = $2 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $2 AND classes.school_id = $3",
+            student = await db.query("SELECT users.name, users.picture, users.username, users.email, users.id, classes.class_code FROM users INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = $2 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $2 AND classes.school_id = $3",
                 [req.params.id, req.query.class, res.locals.currentUser.id]);
         }
         
@@ -115,11 +115,11 @@ exports.getStudentDetentions = async (req, res, next) => {
         let detentions;
 
         if (res.locals.currentUser.position === "teacher") {
-            detentions = await db.query("SELECT detentions.location, detentions.date, detentions.reason, detentions.id FROM detentions LEFT JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND detentions.class_id = $2 AND classes.school_id = $3 AND detentions.date < $4 ORDER BY detentions.date DESC LIMIT 10",
-                [req.params.id, req.query.class, res.locals.currentUser.school_id, req.query.date]);
+            detentions = await db.query("SELECT detentions.location, detentions.date, detentions.reason, detentions.id FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND detentions.class_id = $2 AND classes.school_id = $3 AND detentions.date > $4 ORDER BY detentions.date ASC LIMIT $5",
+                [req.params.id, req.query.class, res.locals.currentUser.school_id, new Date(req.query.date), Number(req.query.length)]);
         } else {
-            detentions = await db.query("SELECT detentions.location, detentions.date, detentions.reason, detentions.id FROM detentions LEFT JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND detentions.class_id = $2 AND classes.school_id = $3 AND detentions.date < $4 ORDER BY detentions.date DESC LIMIT 10",
-                [req.params.id, req.query.class, res.locals.currentUser.id, req.query.date]);
+            detentions = await db.query("SELECT detentions.location, detentions.date, detentions.reason, detentions.id FROM detentions INNER JOIN classes ON detentions.class_id = classes.id AND detentions.student_id = $1 AND detentions.class_id = $2 AND classes.school_id = $3 AND detentions.date > $4 ORDER BY detentions.date ASC LIMIT $5",
+                [req.params.id, req.query.class, res.locals.currentUser.id, new Date(req.query.date), Number(req.query.length)]);
         }
         
         res.status(201).json({
@@ -127,6 +127,7 @@ exports.getStudentDetentions = async (req, res, next) => {
             data: detentions.rows
         })
     } catch (err) {
+        console.log(err)
         res.status(500).json({
             success: false,
             error: 'Server Error'
@@ -136,12 +137,11 @@ exports.getStudentDetentions = async (req, res, next) => {
 
 exports.postStudentDetentions = async (req, res, next) => {
     try {
-        const detention = await db.query("INSERT INTO detentions (class_id, student_id, location, date, reason) VALUES ($1, $2, $3, $4, $5, $6) returning *",
-                [req.body.class_id, req.body.student_id, req.body.duration, req.body.location, req.body.date, req.body.reason]);
+        await db.query("INSERT INTO detentions (class_id, student_id, location, date, reason) VALUES ($1, $2, $3, $4, $5) returning *",
+                [req.body.class_id, req.body.student_id, req.body.location, req.body.date, req.body.reason]);
         
         res.status(201).json({
-            success: true,
-            data: detention.rows[0]
+            success: true
         })
     } catch (err) {
         console.log(err)
@@ -189,11 +189,11 @@ exports.getStudentNotes = async (req, res, next) => {
         let notes;
 
         if (res.locals.currentUser.position === "teacher") {
-            notes = await db.query("SELECT notes.note, notes.created, notes.id FROM notes LEFT JOIN classes ON notes.class_id = classes.id AND notes.student_id = $1 AND notes.class_id = $2 AND classes.school_id = $3 AND notes.created < $4 ORDER BY notes.created DESC LIMIT 10",
-                [req.params.id, req.query.class, res.locals.currentUser.school_id, req.query.date]);
+            notes = await db.query("SELECT notes.note, notes.created, notes.id FROM notes INNER JOIN classes ON notes.class_id = classes.id AND notes.student_id = $1 AND notes.class_id = $2 AND classes.school_id = $3 AND notes.created < $4 ORDER BY notes.created DESC LIMIT $5",
+                [req.params.id, req.query.class, res.locals.currentUser.school_id, new Date(req.query.date), Number(req.query.length)]);
         } else {
-            notes = await db.query("SELECT notes.note, notes.created, notes.id FROM notes LEFT JOIN classes ON notes.class_id = classes.id AND notes.student_id = $1 AND notes.class_id = $2 AND classes.school_id = $3 AND notes.created < $4 ORDER BY notes.created DESC LIMIT 10",
-                [req.params.id, req.query.class, res.locals.currentUser.id, req.query.date]);
+            notes = await db.query("SELECT notes.note, notes.created, notes.id FROM notes INNER JOIN classes ON notes.class_id = classes.id AND notes.student_id = $1 AND notes.class_id = $2 AND classes.school_id = $3 AND notes.created < $4 ORDER BY notes.created DESC LIMIT $5",
+                [req.params.id, req.query.class, res.locals.currentUser.id, new Date(req.query.date), Number(req.query.length)]);
         }
         
         res.status(201).json({
@@ -210,12 +210,11 @@ exports.getStudentNotes = async (req, res, next) => {
 
 exports.postStudentNotes = async (req, res, next) => {
     try {
-        const note = await db.query("INSERT INTO notes (class_id, student_id, note, created) VALUES ($1, $2, $3, $4) returning *",
+        await db.query("INSERT INTO notes (class_id, student_id, note, created) VALUES ($1, $2, $3, $4) returning *",
                 [req.body.class_id, req.body.student_id, req.body.note, req.body.created]);
         
         res.status(201).json({
-            success: true,
-            data: note.rows[0]
+            success: true
         })
     } catch (err) {
         res.status(500).json({
@@ -265,7 +264,7 @@ exports.getStudentsLesson = async (req, res, next) => {
             students = await db.query("SELECT users.name, users.picture, users.username, users.id FROM users INNER JOIN students_classes ON students_classes.class_id = $1 AND students_classes.student_id = users.id AND users.school_id = $2",
                 [req.params.id, res.locals.currentUser.school_id]);
         } else {
-            students = await db.query("SELECT users.name, users.picture, users.username, users.id FROM users INNER JOIN students_classes ON students_classes.class_id = $1 AND students_classes.student_id = users.id AND users.school_id = $2)",
+            students = await db.query("SELECT users.name, users.picture, users.username, users.id FROM users INNER JOIN students_classes ON students_classes.class_id = $1 AND students_classes.student_id = users.id AND users.school_id = $2",
                 [req.params.id, res.locals.currentUser.id]);
         }
         
@@ -274,6 +273,7 @@ exports.getStudentsLesson = async (req, res, next) => {
             data: students.rows
         })
     } catch (err) {
+        console.log(err)
         res.status(500).json({
             success: false,
             error: 'Server Error'
@@ -445,12 +445,29 @@ exports.putUser = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
     try {
-        await db.query("DELETE FORM users WHERE id = $1", [req.params.id]);
+        await db.query("DELETE FROM users WHERE id = $1", [req.params.id]);
 
         res.status(201).json({
             success: true
         })
     } catch (err) {
+        console.log(err)
+        res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        })
+    }
+}
+
+exports.deleteSchool = async (req, res, next) => {
+    try {
+        await db.query("DELETE FROM schools WHERE id = $1", [req.params.id]);
+
+        res.status(201).json({
+            success: true
+        })
+    } catch (err) {
+        console.log(err)
         res.status(500).json({
             success: false,
             error: 'Server Error'

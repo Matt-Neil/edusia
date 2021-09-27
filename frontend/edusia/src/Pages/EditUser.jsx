@@ -1,9 +1,10 @@
 import React, {useState, useEffect, useContext} from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import usersAPI from "../API/users"
 import imageAPI from "../API/file"
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
+import MessageCard from '../Components/MessageCard'
 
 const EditUser = ({currentUser}) => {
     const [loaded, setLoaded] = useState(false);
@@ -16,14 +17,19 @@ const EditUser = ({currentUser}) => {
     const [password, setPassword] = useState("");
     const userID = useParams().id;
     const {displayUpdatedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
+    const history = useHistory();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await usersAPI.get(`/${userID}/edit`);
+                const user = await usersAPI.get(`/${userID}/edit`);
 
-                setUser(response.data.data);
-                setLoaded(true);
+                if (user.data.data) {
+                    setUser(user.data.data);
+                    setLoaded(true);
+                } else {
+                    history.replace("/home");
+                }
             } catch (err) {
                 displayMessageErrorInterval("Error Loading Page")
             }
@@ -72,12 +78,16 @@ const EditUser = ({currentUser}) => {
     const editUser = async (e) => {
         e.preventDefault();
 
-        if (name === "" || username === "" || email === "" || password === "") {
+        if (name === "" || username === "" || email === "") {
             displayMessageErrorInterval("No Blank Fields")
         } else {
             try {
+                let tempPassword;
+
                 if (password === "") {
-                    setPassword(user.password);
+                    tempPassword = user.password;
+                } else {
+                    tempPassword = password;
                 }
 
                 await usersAPI.put(`/${userID}/edit`, 
@@ -85,7 +95,7 @@ const EditUser = ({currentUser}) => {
                     name: name,
                     username: username,
                     email: email,
-                    password: password,
+                    password: tempPassword,
                     picture: pictureName,
                     position: user.position,
                     school_id: user.school_id
@@ -98,14 +108,24 @@ const EditUser = ({currentUser}) => {
         }
     }
 
+    const deleteUser = async () => {
+        try {
+            await usersAPI.delete(`/${userID}/edit`)
+
+            history.replace("/home")
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
+    }
+
     return (
         <>
             {loaded &&
                 <>
-                    <Header path={[{text: "Home", link: ""}, `Edit ${user.name} (${user.username})`]} />
+                    <Header path={[{text: "Home", link: "/"}, `Edit ${user.name} (${user.username})`]} />
                     <div className="toolbar">
-                        <Link to={`/home/add-student`}>Cancel Edit</Link>
-                        <Link to={`/home`}>Return Home</Link>
+                        <Link to={`/user/${userID}`}>Cancel Edit</Link>
+                        <button onClick={() => {deleteUser()}}>Delete User</button>
                     </div>
                     <img src={`http://localhost:5000/uploads/${pictureName}`} className="img4" alt="User Avatar" />
                     <form method="POST" onSubmit={uploadPicture} encType="multipart/form-data">
@@ -128,8 +148,8 @@ const EditUser = ({currentUser}) => {
                             <input className="loginButton text4" type="submit" value="Update" />
                         </div>
                     </form>
-                    {displayUpdatedMessage && <p>Updated</p>}
-                    {displayErrorMessage && <p>{error}</p>}
+                    {displayUpdatedMessage && <MessageCard message={"Updated"} />}
+                    {displayErrorMessage && <MessageCard message={error} />}
                 </>
             }
         </>

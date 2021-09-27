@@ -4,6 +4,7 @@ import usersAPI from "../API/users"
 import fileAPI from "../API/file"
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
+import MessageCard from '../Components/MessageCard'
 
 const AddUser = ({currentUser, position}) => {
     const [name, setName] = useState("");
@@ -76,7 +77,7 @@ const AddUser = ({currentUser, position}) => {
 
     return (
         <>
-            <Header path={[{text: "Home", link: ""}, "Add User"]} />
+            <Header path={[{text: "Home", link: "/"}, "Add User"]} />
             <div className="toolbar">
                 <Link to={`/home/add-student`}>Add Student</Link>
                 <Link to={`/home/add-teacher`}>Add Teacher</Link>
@@ -104,8 +105,8 @@ const AddUser = ({currentUser, position}) => {
                     <input className="loginButton text4" type="submit" value={"Add User"} />
                 </div>
             </form>
-            {displayAddedMessage && <p>Added</p>}
-            {displayErrorMessage && <p>{error}</p>}
+            {displayAddedMessage && <MessageCard message={"Added"} />}
+            {displayErrorMessage && <MessageCard message={error} />}
         </>
     )
 }

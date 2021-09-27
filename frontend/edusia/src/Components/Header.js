@@ -5,20 +5,24 @@ const Header = ({path}) => {
 
     const display = () => {
         if (path.length === 1) {
-            return <p className="headerLocation">{path[0]}</p>
+            return (
+                <div className="header">
+                    <p className="headerLocation">{path[0]}</p>
+                </div>
+            ) 
         } else {
             let content = [];
 
             for (let i = 0; i < path.length; i++) {
                 if (i !== path.length-1) {
-                    content.push(<><Link className="headerLocation" to={`/${path[i].link}`}>{path[i].text}</Link><p>|</p></>)
+                    content.push(<div className="headerPair"><Link className="headerPath" to={`${path[i].link}`}>{path[i].text}</Link><p>|</p></div>)
                 } else {
                     content.push(<p className="headerLocation">{path[i]}</p>)
                 }
             }
 
             return (
-                <div>
+                <div className="header">
                     {content.map((item, i) => {
                         return <div key={i}>{item}</div>
                     })}
@@ -28,9 +32,9 @@ const Header = ({path}) => {
     }
 
     return (
-        <div className="header">
+        <>
             {display()}
-        </div>
+        </>
     )
 }
 
