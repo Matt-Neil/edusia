@@ -15,11 +15,11 @@ exports.getSearch = async (req, res, next) => {
                         [req.query.phrase.replace(' ', ' & '), res.locals.currentUser.id]);
                     break;
                 case 'students':
-                    results = await db.query("SELECT name, id, email, picture FROM users WHERE tokens @@ to_tsquery($1) AND position = 'student' AND school_id = $2", 
+                    results = await db.query("SELECT name, id, email, username, picture FROM users WHERE tokens @@ to_tsquery($1) AND position = 'student' AND school_id = $2", 
                         [req.query.phrase.replace(' ', ' & '), res.locals.currentUser.id]);
                     break;
                 case 'all':
-                    results = await db.query("SELECT name, id, email, picture FROM users WHERE tokens @@ to_tsquery($1) AND school_id = $2", 
+                    results = await db.query("SELECT name, id, email, username, picture FROM users WHERE tokens @@ to_tsquery($1) AND school_id = $2", 
                         [req.query.phrase.replace(' ', ' & '), res.locals.currentUser.id]);
                     break;
             }
@@ -49,7 +49,6 @@ exports.getSearch = async (req, res, next) => {
             data: results.rows
         })
     } catch (err) {
-        console.log(err)
         return res.status(500).json({
             success: false,
             error: 'Server Error'

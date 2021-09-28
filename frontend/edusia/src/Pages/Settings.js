@@ -53,8 +53,8 @@ const Settings = ({currentUser}) => {
 
             setPictureName(uploadResponse.data.data);
 
-            if (pictureName !== "") {
-                await fileAPI.put('/remove', {file: pictureName});
+            if (uploadResponse.data.data !== "" && pictureName !== "default.png") {
+                await fileAPI.put('/remove', {file: uploadResponse.data.data});
             }
         } catch (err) {
             displayMessageErrorInterval("Server Error")
@@ -80,19 +80,21 @@ const Settings = ({currentUser}) => {
         e.preventDefault();
 
         try {
-            if (password === "") {
-                displayMessageErrorInterval("Blank Password")
-            } else {
-                await usersAPI.put(`/settings`, 
-                {
-                    password: password,
-                    picture: pictureName
-                });
+            let tempPassword = password;
 
-                setPassword("");
-                setPictureName(user.picture);
-                displayMessageUpdatedInterval();
+            if (password === "") {
+                tempPassword = user.password;
             }
+            
+            await usersAPI.put(`/settings`, 
+            {
+                password: tempPassword,
+                picture: pictureName
+            });
+
+            setPassword("");
+            setPictureName(user.picture);
+            displayMessageUpdatedInterval();
         } catch (err) {
             displayMessageErrorInterval("Server Error")
         }
@@ -132,7 +134,7 @@ const Settings = ({currentUser}) => {
                         </form>
                         <form method="POST" onSubmit={updateUser}>
                             <div className="multipleInput">
-                                <input className="textInput" type="text" name="password" placeholder="Password" value={password} onChange={e => {setPassword(e.target.value)}} />
+                                <input className="textInput" type="password" name="password" placeholder="Password" value={password} onChange={e => {setPassword(e.target.value)}} />
                             </div>
                             <div>
                                 <input className="buttonBlue" type="submit" value={"Update Account"} />

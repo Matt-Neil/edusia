@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getStudentsSchool, getTeachersSchool, getUserEdit, postUser, putUser, deleteUser, getSettings, putSettings, getDetentions, getNotifications,
+const { getStudentsSchool, getTeachersSchool, postUser, putUser, deleteUser, getSettings, putSettings, getDetentions, getNotifications,
     getStudentsLesson, getStudentLesson, getUser, getStudentNotes, getStudentDetentions, postStudentNotes, putStudentNotes, deleteStudentNotes,
     postStudentDetentions, putStudentDetentions, deleteStudentDetentions, deleteSchool } = require('../controllers/users');
 
@@ -22,7 +22,7 @@ router.route('/students/:id/school').get(getStudentsSchool);
 
 router.route('/teachers/:id/school').get(getTeachersSchool);
 
-router.route('/:id/edit').get(getUserEdit).put(putUser).delete(deleteUser);
+router.route('/:id/edit').put(putUser).delete(deleteUser);
 
 router.route('/:id').get(getUser).post(postUser).delete(deleteSchool);
 

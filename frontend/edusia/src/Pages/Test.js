@@ -6,7 +6,7 @@ import Header from '../Components/Header';
 import MessageCard from '../Components/MessageCard'
 import StudentCard from '../Components/StudentCard'
 
-const Test = () => {
+const Test = ({currentUser}) => {
     const [loaded, setLoaded] = useState(false);
     const [students, setStudents] = useState();
     const [edit, setEdit] = useState([]);
@@ -21,23 +21,27 @@ const Test = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const test = await testsAPI.get(`/${testID}?class=${classID}`)
-
-                if (test.data.data) {
-                    for (let i = 0; i < test.data.data.students.length; i++) {
-                        setGrades(previousState => Object.assign([], previousState, {[i]: test.data.data.students[i].grade}))
-                    }
-
-                    for (let i = 0; i < test.data.data.students.length; i++) {
-                        setUpdateGrades(previousState => Object.assign([], previousState, {[i]: test.data.data.students[i].grade}))
-                    }
-
-                    setEdit(new Array(test.data.data.students.length).fill(false));
-                    setStudents(test.data.data.students);
-                    setTest(test.data.data.test);
-                    setLoaded(true);
-                } else {
+                if (currentUser.position === "student") {
                     history.replace("/home");
+                } else {
+                    const test = await testsAPI.get(`/${testID}?class=${classID}`)
+
+                    if (test.data.data) {
+                        for (let i = 0; i < test.data.data.students.length; i++) {
+                            setGrades(previousState => Object.assign([], previousState, {[i]: test.data.data.students[i].grade}))
+                        }
+
+                        for (let i = 0; i < test.data.data.students.length; i++) {
+                            setUpdateGrades(previousState => Object.assign([], previousState, {[i]: test.data.data.students[i].grade}))
+                        }
+
+                        setEdit(new Array(test.data.data.students.length).fill(false));
+                        setStudents(test.data.data.students);
+                        setTest(test.data.data.test);
+                        setLoaded(true);
+                    } else {
+                        history.replace("/home");
+                    }
                 }
             } catch (err) {
                 displayMessageErrorInterval("Error Loading Page")
@@ -78,7 +82,7 @@ const Test = () => {
         <>
             {loaded &&
                 <>
-                    <Header path={[{text: "Home", link: "/"}, {text: `Class ${test.class_code}`, link: `/class/${classID}`}, test.title]} />
+                    <Header path={[{text: "Home", link: "/"}, {text: `Class: ${test.class_code}`, link: `/class/${classID}`}, `Test: ${test.title}`]} />
                     <div className="innerBody">
                         <p className="pageTitle">Test Results</p>
                         {students.map((student, i) => {
@@ -87,7 +91,7 @@ const Test = () => {
                                     <StudentCard user={student} classID={classID} />
                                     {edit[i] ?
                                         <>
-                                            <form className="loginBody" method="PUT" onSubmit={updateGrade} id={i}>
+                                            <form method="PUT" onSubmit={updateGrade} id={i}>
                                                 <input style={{margin: "0 15px 0 0"}} className="textInput" type="text" name="grade" placeholder="Grade" value={updateGrades[i]} onChange={e => {setUpdateGrades(previousState => Object.assign([], previousState, {[i]: e.target.value}))}} />
                                                 <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update" />
                                                 <button className="buttonOrange" onClick={() => {cancelGrade(i)}}>Cancel</button>
@@ -96,11 +100,11 @@ const Test = () => {
                                     :
                                         <>
                                             {grades[i] ?
-                                                <p>{grades[i]}</p>  
+                                                <p>Grade: {grades[i]}</p>  
                                             :
                                                 <p>No Grade</p>  
                                             }
-                                            <button style={{margin: "0 0 0 15px"}} className="buttonBlue" onClick={() => {setEdit(previousState => Object.assign([], previousState, {[i]: true}))}}>Update Grade</button>
+                                            {currentUser.id === test.teacher_id && <button style={{margin: "0 0 0 15px"}} className="buttonBlue" onClick={() => {setEdit(previousState => Object.assign([], previousState, {[i]: true}))}}>Update Grade</button>}
                                         </>
                                     }
                                 </div>

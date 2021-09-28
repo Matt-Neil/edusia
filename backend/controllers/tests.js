@@ -38,7 +38,7 @@ exports.getTests = async (req, res, next) => {
 
 exports.getTest = async (req, res, next) => {
     try {
-        const test = await db.query("SELECT tests.title, tests.date, classes.class_code FROM tests INNER JOIN classes ON tests.id = $1 AND tests.class_id = $2 AND (classes.school_id = $3 OR classes.school_id = $4)", 
+        const test = await db.query("SELECT tests.title, tests.date, classes.class_code, classes.teacher_id FROM tests INNER JOIN classes ON tests.id = $1 AND tests.class_id = $2 AND classes.id = $2 AND (classes.school_id = $3 OR classes.school_id = $4)", 
             [req.params.id, req.query.class, res.locals.currentUser.id, res.locals.currentUser.school_id]);
 
         const students = await db.query("SELECT students_tests.grade, users.name, users.picture, users.username, users.email, users.id FROM students_tests INNER JOIN tests ON tests.id = students_tests.test_id AND tests.id = $1 AND tests.class_id = $2 INNER JOIN users ON users.id = students_tests.student_id INNER JOIN classes ON tests.class_id = classes.id AND (classes.school_id = $3 OR classes.school_id = $4) ORDER BY users.name",
@@ -62,8 +62,8 @@ exports.getTest = async (req, res, next) => {
 
 exports.updateTest = async (req, res, next) => {
     try {
-        const lesson = await db.query("SELECT classes.subject, classes.class_code, users.name, users.picture, users.email, users.username FROM classes INNER JOIN users ON classes.id = $1 AND (classes.school_id = $2 OR classes.teacher_id = $2) AND users.id = classes.teacher_id", 
-            [req.params.id, res.locals.currentUser.id]);
+        const lesson = await db.query("UPDATE tests SET title = $1, date = $2 WHERE id = $3 returning *", 
+            [req.body.title, req.body.date, req.params.id]);
         
         res.status(201).json({
             success: true,

@@ -76,30 +76,33 @@ const LogIn = () => {
     }
     
     return (
-        <div className="loginBody">
-            <p className="titleExpanded">Edusia</p>
-            {login ?
-                <form method="POST" onSubmit={loginUser}>
-                    <div>
-                        <input className="textInput" type="text" name="email" placeholder="Email" value={loginEmail} onChange={e => {setLoginEmail(e.target.value)}} />
-                        <input className="textInput" type="password" name="password" placeholder="Password" value={loginPassword} onChange={e => {setLoginPassword(e.target.value)}} />
-                    </div>
-                    <input className="buttonBlue" type="submit" value="Log in" />
-                    <button className="buttonOrange" type="button" onClick={() => {setLogin(false)}}>Register School</button>
-                </form>
-            :
-                <form method="POST" onSubmit={newSchool}>
-                    <div>
-                        <input className="textInput" type="text" name="name" placeholder="School Name" value={name} onChange={e => {setName(e.target.value)}} />
-                        <input className="textInput" type="text" name="email" placeholder="Email" value={email} onChange={e => {setEmail(e.target.value)}} />
-                        <input className="textInput" type="password" name="password" placeholder="Password" value={password} onChange={e => {setPassword(e.target.value)}} />
-                    </div>
-                    <input className="buttonBlue" type="submit" value="Register School" />
-                    <button className="buttonOrange" type="button" onClick={() => {setLogin(true)}}>Already Have an Account?</button>
-                </form>
-            }
+        <>
+            <div className="middleBody">
+                <div className="loginBody">
+                    {login ?
+                        <form className="loginForm" method="POST" onSubmit={loginUser}>
+                            <div style={{display: "flex", flexDirection: "column"}}>
+                                <input className="textInput" type="text" name="email" placeholder="Email" value={loginEmail} onChange={e => {setLoginEmail(e.target.value)}} />
+                                <input style={{margin: "5px 0 25px 0"}} className="textInput" type="password" name="password" placeholder="Password" value={loginPassword} onChange={e => {setLoginPassword(e.target.value)}} />
+                            </div>
+                            <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Log in" />
+                            <button className="buttonOrange" type="button" onClick={() => {setLogin(false)}}>Register School</button>
+                        </form>
+                    :
+                        <form className="loginForm" method="POST" onSubmit={newSchool}>
+                            <div style={{display: "flex", flexDirection: "column"}}>
+                                <input className="textInput" type="text" name="name" placeholder="School Name" value={name} onChange={e => {setName(e.target.value)}} />
+                                <input style={{margin: "5px 0 15px 0"}} className="textInput" type="text" name="email" placeholder="Email" value={email} onChange={e => {setEmail(e.target.value)}} />
+                                <input style={{margin: "5px 0 25px 0"}} className="textInput" type="password" name="password" placeholder="Password" value={password} onChange={e => {setPassword(e.target.value)}} />
+                            </div>
+                            <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Register School" />
+                            <button className="buttonOrange" type="button" onClick={() => {setLogin(true)}}>Already Have an Account?</button>
+                        </form>
+                    }
+                </div>
+            </div>
             {displayErrorMessage && <MessageCard message={error} />}
-        </div>
+        </>
     )
 }
 

@@ -5,23 +5,29 @@ import NotificationCard from '../Components/NotificationCard';
 import DetentionCard from '../Components/DetentionCard'
 import { MessageContext } from '../Contexts/messageContext';
 import MessageCard from '../Components/MessageCard'
+import { useHistory } from 'react-router-dom';
 
-const Noticeboard = () => {
+const Noticeboard = ({currentUser}) => {
     const [notifications, setNotifications] = useState();
     const [detentions, setDetentions] = useState();
     const [displayNotifications, setDisplayNotifications] = useState(true);
     const [loaded, setLoaded] = useState(false);
     const {displayErrorMessage, displayMessageErrorInterval, error} = useContext(MessageContext)
+    const history = useHistory()
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const notifications = await usersAPI.get(`/notifications`);
-                const detentions = await usersAPI.get(`/detentions`);
+                if (currentUser.position !== "student") {
+                    history.replace("/home");
+                } else {
+                    const notifications = await usersAPI.get(`/notifications`);
+                    const detentions = await usersAPI.get(`/detentions`);
 
-                setNotifications(notifications.data.data);
-                setDetentions(detentions.data.data);
-                setLoaded(true);
+                    setNotifications(notifications.data.data);
+                    setDetentions(detentions.data.data);
+                    setLoaded(true);
+                }
             } catch (err) {
                 displayMessageErrorInterval("Error Loading Page")
             }

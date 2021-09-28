@@ -1,5 +1,4 @@
 import React, {useState, useEffect, useContext} from 'react'
-import { Link } from 'react-router-dom'
 import homeworkAPI from "../API/homework"
 import classesAPI from "../API/classes"
 import usersAPI from "../API/users"
@@ -12,12 +11,20 @@ import { ExpiredContext } from '../Contexts/expiredContext';
 import { MessageContext } from '../Contexts/messageContext';
 import Header from "../Components/Header"
 import MessageCard from "../Components/MessageCard"
+import AddUser from "../Components/AddUser"
+import AddClass from '../Components/AddClass'
 
 const Home = ({currentUser}) => {
     const [homework, setHomework] = useState([]);
     const [classes, setClasses] = useState([]);
     const [students, setStudents] = useState([]);
     const [teachers, setTeachers] = useState([]);
+    const [studentsLength, setStudentsLength] = useState(0);
+    const [teachersLength, setTeachersLength] = useState(0);
+    const [classesLength, setClassesLength] = useState(0);
+    const [addStudent, setAddStudent] = useState(false);
+    const [addTeacher, setAddTeacher] = useState(false);
+    const [addClass, setAddClass] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searchPhrase, setSearchPhrase] = useState("");
     const [displaySearch, setDisplaySearch] = useState(false);
@@ -29,6 +36,7 @@ const Home = ({currentUser}) => {
     const [finishedStudents, setFinishedStudents] = useState(false);
     const [finishedTeachers, setFinishedTeachers] = useState(false);
     const [finishedClasses, setFinishedClasses] = useState(false);
+    const [title, setTitle] = useState("Dashboard");
     const {completed, changeCompleted} = useContext(CompletedContext);
     const {expired, changeExpired} = useContext(ExpiredContext);
     const {displayErrorMessage, displayMessageErrorInterval, error} = useContext(MessageContext);
@@ -38,7 +46,7 @@ const Home = ({currentUser}) => {
             switch (currentUser.position) {
                 case "student":
                     try {
-                         const homework = await homeworkAPI.get("/student?date=2020-01-01T00:15:00.000Z");
+                        const homework = await homeworkAPI.get("/student?date=2020-01-01T00:15:00.000Z");
 
                         if (homework.data.data.length < 10) {
                             setFinishedHomework(true);
@@ -62,9 +70,9 @@ const Home = ({currentUser}) => {
                     break;
                 case "school":
                     try {
-                        const classes = await classesAPI.get(`/${currentUser.id}/school`);
-                        const teachers = await usersAPI.get(`/teachers/${currentUser.id}/school`);
-                        const students = await usersAPI.get(`/students/${currentUser.id}/school`);
+                        const classes = await classesAPI.get(`/${currentUser.id}/school?length=10`);
+                        const teachers = await usersAPI.get(`/teachers/${currentUser.id}/school?length=10`);
+                        const students = await usersAPI.get(`/students/${currentUser.id}/school?length=10`);
 
                         if (classes.data.data.length < 10) {
                             setFinishedClasses(true);
@@ -78,6 +86,9 @@ const Home = ({currentUser}) => {
                             setFinishedStudents(true);
                         }
             
+                        setStudentsLength(students.data.data.length);
+                        setTeachersLength(teachers.data.data.length);
+                        setClassesLength(classes.data.data.length);
                         setClasses(classes.data.data);
                         setTeachers(teachers.data.data);
                         setStudents(students.data.data);
@@ -90,6 +101,54 @@ const Home = ({currentUser}) => {
         }
         fetchData();
     }, [])
+
+    const refreshStudents = async () => {
+        try {
+            const response = await usersAPI.get(`/students/${currentUser.id}/school?length=${studentsLength}`);
+
+            if (response.data.data.length % 10 !== 0) {
+                setFinishedStudents(true);
+            }
+
+            setStudents(response.data.data);
+            setTitle("Dashboard")
+            setAddStudent(false)
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
+    }
+
+    const refreshTeachers = async () => {
+        try {
+            const response = await usersAPI.get(`/teachers/${currentUser.id}/school?length=${teachersLength}`);
+
+            if (response.data.data.length % 10 !== 0) {
+                setFinishedTeachers(true);
+            }
+
+            setTeachers(response.data.data);
+            setTitle("Dashboard")
+            setAddTeacher(false)
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
+    }
+
+    const refreshClasses = async () => {
+        try {
+            const response = await classesAPI.get(`/${currentUser.id}/school?length=${classesLength}`);
+
+            if (response.data.data.length % 10 !== 0) {
+                setFinishedClasses(true);
+            }
+
+            setClasses(response.data.data);
+            setTitle("Dashboard")
+            setAddClass(false)
+        } catch (err) {
+            displayMessageErrorInterval("Server Error")
+        }
+    }
 
     const loadMoreHomework = async () => {
         if (currentUser.position === "student" && homework.length !== 0 && !finishedHomework) {
@@ -201,6 +260,21 @@ const Home = ({currentUser}) => {
             return true;
         }
     }
+    
+    const addClassPage = () => {
+        setTitle("Add Class")
+        setAddClass(true)
+    }
+
+    const addStudentPage = () => {
+        setTitle("Add Student")
+        setAddStudent(true)
+    }
+
+    const addTeacherPage = () => {
+        setTitle("Add Teacher")
+        setAddTeacher(true)
+    }
 
     return (
         <>
@@ -273,10 +347,7 @@ const Home = ({currentUser}) => {
                         <>
                             <div className="toolbar">
                                 <div className="toolbarLeft">
-                                    <button className="buttonBlue toolbarItem">Add Student</button>
-                                    <button className="buttonBlue toolbarItem">Add Teacher</button>
-                                    <button style={{margin: "0 10px 0 25px"}} className="buttonBlue toolbarItem">Add Class</button>
-                                    <select className="select" onChange={e => {setDisplayOptions(e.target.value)}}>
+                                    <select className="select toolbarItem" onChange={e => {setDisplayOptions(e.target.value)}}>
                                         <option value="students">View Students</option>
                                         <option value="teachers">View Teachers</option>
                                         <option value="classes">View Classes</option>
@@ -295,7 +366,7 @@ const Home = ({currentUser}) => {
                                 </select>
                             </div>
                             <div className="innerBody">
-                                <p className="pageTitle">Dashboard</p>
+                                <p className="pageTitle">{title}</p>
                                 {displaySearch ?
                                     <>
                                         {displayOptions === "students" &&
@@ -345,44 +416,74 @@ const Home = ({currentUser}) => {
                                     <>
                                         {displayOptions === "students" &&
                                             <>
-                                                <div className="userPageRows">
-                                                    { students && students.map((userReducer, i) => {
-                                                        return <UserCard user={userReducer} key={i} />
-                                                    })}
-                                                </div>
-                                                <div className="finished">
-                                                    {!finishedStudents &&
-                                                        <p className="loadMore text4" onClick={() => {loadMoreStudents()}}>Load more</p>
-                                                    }
-                                                </div>
+                                                {addStudent ?
+                                                    <>
+                                                        <AddUser currentUser={currentUser} position={"student"} setLength={setStudentsLength} />
+                                                        <button style={{margin: "50px 0 0 0"}} className="buttonOrange" onClick={() => {refreshStudents()}}>Cancel</button>
+                                                    </>
+                                                :
+                                                    <>
+                                                        <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {addStudentPage()}}>Add Student</button>
+                                                        <div className="userPageRows">
+                                                            { students && students.map((userReducer, i) => {
+                                                                return <UserCard user={userReducer} key={i} />
+                                                            })}
+                                                        </div>
+                                                        <div className="finished">
+                                                            {!finishedStudents &&
+                                                                <p className="loadMore text4" onClick={() => {loadMoreStudents()}}>Load more</p>
+                                                            }
+                                                        </div>
+                                                    </>
+                                                }
                                             </>
                                         }
                                         {displayOptions === "teachers" &&
                                             <>
-                                                <div className="userPageRows">
-                                                    { teachers && teachers.map((userReducer, i) => {
-                                                        return <UserCard user={userReducer} key={i} />
-                                                    })}
-                                                </div>
-                                                <div className="finished">
-                                                    {!finishedTeachers &&
-                                                        <p className="loadMore text4" onClick={() => {loadMoreTeachers()}}>Load more</p>
-                                                    }
-                                                </div>
+                                                {addTeacher ?
+                                                    <>
+                                                        <AddUser currentUser={currentUser} position={"teacher"} setLength={setTeachersLength} />
+                                                        <button style={{margin: "50px 0 0 0"}} className="buttonOrange" onClick={() => {refreshTeachers()}}>Cancel</button>
+                                                    </>
+                                                :
+                                                    <>
+                                                        <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {addTeacherPage()}}>Add Teacher</button>
+                                                        <div className="userPageRows">
+                                                            { teachers && teachers.map((userReducer, i) => {
+                                                                return <UserCard user={userReducer} key={i} />
+                                                            })}
+                                                        </div>
+                                                        <div className="finished">
+                                                            {!finishedTeachers &&
+                                                                <p className="loadMore text4" onClick={() => {loadMoreTeachers()}}>Load more</p>
+                                                            }
+                                                        </div>
+                                                    </>
+                                                }
                                             </>
                                         }
                                         {displayOptions === "classes" &&
                                             <>
-                                                <div className="userPageRows">
-                                                    { classes && classes.map((classesReducer, i) => {
-                                                        return <ClassCard classesReducer={classesReducer} key={i} />
-                                                    })}
-                                                </div>
-                                                <div className="finished">
-                                                    {!finishedClasses &&
-                                                        <p className="loadMore text4" onClick={() => {loadMoreClasses()}}>Load more</p>
-                                                    }
-                                                </div>
+                                                {addClass ?
+                                                    <>
+                                                        <AddClass currentUser={currentUser} setStudentsLength={setClassesLength} />
+                                                        <button style={{margin: "50px 0 0 0"}} className="buttonOrange" onClick={() => {refreshClasses()}}>Cancel</button>
+                                                    </>
+                                                :
+                                                    <>
+                                                        <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {addClassPage()}}>Add Class</button>
+                                                        <div className="userPageRows">
+                                                            { classes && classes.map((classesReducer, i) => {
+                                                                return <ClassCard classesReducer={classesReducer} key={i} />
+                                                            })}
+                                                        </div>
+                                                        <div className="finished">
+                                                            {!finishedClasses &&
+                                                                <p className="loadMore text4" onClick={() => {loadMoreClasses()}}>Load more</p>
+                                                            }
+                                                        </div>
+                                                    </>
+                                                }
                                             </>
                                         }
                                     </>

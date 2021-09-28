@@ -1,10 +1,12 @@
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import homeworkAPI from "../API/homework"
 import fileAPI from "../API/file"
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { MessageContext } from '../Contexts/messageContext';
 import Header from '../Components/Header';
 import MessageCard from '../Components/MessageCard'
+import EditHomework from '../Components/EditHomework';
+import UserCard from '../Components/UserCard';
 const moment = require('moment');
 
 const Homework = ({currentUser}) => {
@@ -15,6 +17,7 @@ const Homework = ({currentUser}) => {
     const [adjustSubmission, setAdjustSubmission] = useState(false);
     const [submissionFile, setSubmissionFile] = useState("");
     const [loaded, setLoaded] = useState(false);
+    const [edit, setEdit] = useState(false);
     const timeoutID = useRef(null);
     const homeworkID = useParams().id;
     const classID = useParams().class;
@@ -22,26 +25,27 @@ const Homework = ({currentUser}) => {
     const {displayAddedMessage, displayErrorMessage, displayMessageAddedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const homework = await homeworkAPI.get(`/${homeworkID}`);
-                const submissions = await homeworkAPI.get(`/${homeworkID}/submissions`);
-
-                if (homework.data.data) {
-                    setHomework(homework.data.data);
-                    setSubmissions(submissions.data.data);
-                    setLoaded(true);
-                } else {
-                    history.replace("/home");
-                }
-
-                
-            } catch (err) {
-                displayMessageErrorInterval("Error Loading Page")
-            }
-        }
         fetchData();
     }, [])
+
+    const fetchData = async () => {
+        try {
+            const homework = await homeworkAPI.get(`/${homeworkID}`);
+            const submissions = await homeworkAPI.get(`/${homeworkID}/submissions`);
+
+            if (homework.data.data) {
+                setHomework(homework.data.data);
+                setSubmissions(submissions.data.data);
+                setLoaded(true);
+            } else {
+                history.replace("/home");
+            }
+
+            
+        } catch (err) {
+            displayMessageErrorInterval("Error Loading Page")
+        }
+    }
 
     useEffect(() => {
         if (loaded) {
@@ -152,89 +156,110 @@ const Homework = ({currentUser}) => {
         }
     }
 
+    const cancelEdit = () => {
+        fetchData()
+        setEdit(false)
+    }
+
     return (
         <>
             {loaded &&
                 <>
-                    <Header path={[{text: "Home", link: "/"}, `Class ${homework.class_code}`]} />
-                    {currentUser.position !== "school" &&
+                    <Header path={[{text: "Home", link: "/"}, {text: `Class: ${homework.class_code}`, link: `/class/${classID}`}, `Homework: ${homework.title}`]} />
+                    {currentUser.position !== "school" && !expired &&
                         <div className="toolbar">
                             {currentUser.position === "student" &&
                                 <>
                                     {completed ?
-                                        <button disabled={expired} onClick={() => {markComplete()}}>Mark Incomplete</button>
+                                        <button className="buttonOrange toolbarItem" onClick={() => {markComplete()}}>Mark Incomplete</button>
                                     :
-                                        <button disabled={expired} onClick={() => {markComplete()}}>Mark Complete</button>
+                                        <button className="buttonBlue toolbarItem" onClick={() => {markComplete()}}>Mark Complete</button>
                                     }
-                                    <button disabled={expired} onClick={() => {setAdjustSubmission(true)}}>Add Submission</button>
+                                    <button className="buttonBlue toolbarItem" onClick={() => {setAdjustSubmission(true)}}>Add Submission</button>
                                 </>
                             }
                             {currentUser.position === "teacher" &&
                                 <>
-                                    <Link to={`edit-homework/${homeworkID}`}>Edit Homework</Link>
-                                    <button onClick={() => {deleteHomework()}}>Delete Homework</button>
+                                    {edit ?
+                                        <button className="buttonOrange toolbarItem" onClick={() => {cancelEdit()}}>Cancel</button>
+                                    :
+                                        <button className="buttonBlue toolbarItem" onClick={() => {setEdit(true)}}>Edit Homework</button>
+                                    }
+                                    <button className="buttonOrange toolbarItem" onClick={() => {deleteHomework()}}>Delete Homework</button>
                                 </>
                             }
                         </div>
                     }
                     <div className="innerBody">
-                        <p>{homework.class}</p>
-                        <p>{homework.subject}</p>
-                        <p>{homework.title}</p>
-                        <p>{homework.description}</p>
-                        <p>{displayDate()}</p>
-                        {homework.file !== "" &&
-                            <a href={`http://localhost:5000/uploads/${homework.file}`} download={homework.file} target="_blank">View Attachment</a>
-                        }
-                        {currentUser.position !== "student" ?
-                            <>
-                                {submissions && submissions.map((submission, i) => {
-                                    return (
-                                        <div key={i}>
-                                            {submission.submission !== "" ?
-                                                <div>
-                                                    <p>{submission.submission}</p>
-                                                </div>
-                                            :
-                                                <div>
-                                                    <p>No submission</p>
-                                                </div>
-                                            }
-                                        </div>
-                                    )
-                                })}
-                            </>
+                        {edit ?
+                            <EditHomework homework={homework} />
                         :
                             <>
-                                {submissions.submission !== "" ?
+                                {currentUser.position === "student" &&
+                                    <div style={{display: 'flex', alignItems: "center", margin: "0 0 30px 0"}}>
+                                        <p className="pageTitle" style={{margin: "15px 15px 0 0"}}>{homework.subject}</p>
+                                        <p className="pageTitle">({homework.class_code})</p>
+                                    </div>
+                                }
+                                <p className="homeworkTitle">{homework.title}</p>
+                                <p>Due: {displayDate()}</p>
+                                <p style={{margin: "50px 0 50px 0"}}>{homework.description}</p>
+                                {homework.file !== "" &&
+                                    <a style={{margin: "25px 0 50px 0"}} className="download" href={`http://localhost:5000/uploads/${homework.file}`} download={homework.file} target="_blank">View Attachment</a>
+                                }
+                                {currentUser.position !== "student" ?
                                     <>
-                                        <p>{submissions.submission}</p>
-                                        <button onClick={() => {removeSubmission()}}>Remove Submission</button>
+                                        {submissions && submissions.map((submission, i) => {
+                                            return (
+                                                <div key={i}>
+                                                    {submission.submission !== "" ?
+                                                        <div className="cardPair">
+                                                            <UserCard user={submission} />
+                                                            <a style={{margin: "25px 0 50px 0"}} className="download" href={`http://localhost:5000/uploads/${submission.submission}`} download={submission.submission} target="_blank">View Submission</a>
+                                                        </div>
+                                                    :
+                                                        <div className="cardPair">
+                                                            <UserCard user={submission} />
+                                                            <p>No submission</p>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            )
+                                        })}
                                     </>
                                 :
                                     <>
-                                        <p>No submission</p>
+                                        {submissions.submission !== "" ?
+                                            <>
+                                                <a style={{margin: "25px 15px 50px 0"}} className="download" href={`http://localhost:5000/uploads/${submissions.submission}`} download={submissions.submission} target="_blank">View Submission</a>
+                                                <button className="buttonOrange" onClick={() => {removeSubmission()}}>Remove Submission</button>
+                                            </>
+                                        :
+                                            <>
+                                                <p>No submission</p>
+                                            </>
+                                        }
+                                    </>
+                                }
+                                {adjustSubmission &&
+                                    <>
+                                        <form style={{margin: "25px 0 0 0"}} method="POST" onSubmit={uploadFile} encType="multipart/form-data">
+                                            <div>
+                                                <input className="fileInput" type="file" name="uploadedFile" onChange={e => {setSubmissionFile(e.target.files[0])}} />
+                                            </div>
+                                            <div className="formSubmit">
+                                                <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Upload file" />
+                                                <button className="buttonOrange" type="button" onClick={() => {removeFile()}}>Remove File</button>
+                                            </div>
+                                        </form>
+                                        <button style={{margin: "25px 0 0 0"}} className="buttonOrange" onClick={() => {setAdjustSubmission(false)}}>Cancel</button>
                                     </>
                                 }
                             </>
                         }
-                        {adjustSubmission &&
-                            <>
-                                <form method="POST" onSubmit={uploadFile} encType="multipart/form-data">
-                                    <div>
-                                        <input className="fileInput" type="file" name="uploadedFile" onChange={e => {setSubmissionFile(e.target.files[0])}} />
-                                    </div>
-                                    <div>
-                                        <input className="pictureUpload text4" type="submit" value="Upload file" />
-                                        <button type="button" className="pictureRemove text4" onClick={() => {removeFile()}}>Remove File</button>
-                                    </div>
-                                </form>
-                                <button onClick={() => {setAdjustSubmission(false)}}>Cancel</button>
-                            </>
-                        }
+                        {displayAddedMessage && <MessageCard message={"Added"} />}
+                        {displayErrorMessage && <MessageCard message={error} />}
                     </div>
-                    {displayAddedMessage && <MessageCard message={"Added"} />}
-                    {displayErrorMessage && <MessageCard message={error} />}
                 </>
             }
         </>

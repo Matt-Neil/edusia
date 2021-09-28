@@ -4,11 +4,11 @@ exports.getHomework = async (req, res, next) => {
     try {
         let homework;
 
-        if (res.locals.currentUser !== "student") {
+        if (res.locals.currentUser.position !== "student") {
             homework = await db.query("SELECT homework.class_id, homework.title, homework.description, homework.deadline, homework.file, classes.class_code FROM homework INNER JOIN classes ON homework.id = $1 AND homework.class_id = classes.id AND (classes.school_id = $2 OR classes.school_id = $3)", 
                 [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id])
         } else {
-            homework = await db.query("SELECT homework.class_id, homework.title, homework.description, homework.deadline, homework.file, students_homework.completed, students_homework.submission, classes.class_code FROM homework INNER JOIN students_homework ON homework.id = $1 AND homework.id = students_homework.homework_id AND students_homework.student_id = $2 INNER JOIN classes ON homework.class_id = classes.id AND classes.school_id = $3",
+            homework = await db.query("SELECT homework.class_id, homework.title, homework.description, homework.deadline, homework.file, students_homework.completed, students_homework.submission, classes.class_code, classes.subject FROM homework INNER JOIN students_homework ON homework.id = $1 AND homework.id = students_homework.homework_id AND students_homework.student_id = $2 INNER JOIN classes ON homework.class_id = classes.id AND classes.school_id = $3",
                 [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id])
         }
 
@@ -44,8 +44,8 @@ exports.getHomeworkStudent = async (req, res, next) => {
 
 exports.getHomeworkClass = async (req, res, next) => {
     try {
-        const homework = await db.query("SELECT homework.id, homework.title, homework.deadline FROM homework INNER JOIN classes ON homework.class_id = $1 AND homework.class_id = classes.id AND (classes.school_id = $2 OR classes.school_id = $3) AND homework.deadline > $4 ORDER BY homework.deadline ASC LIMIT 10",
-            [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id, new Date(req.query.date)])
+        const homework = await db.query("SELECT homework.id, homework.title, homework.deadline FROM homework INNER JOIN classes ON homework.class_id = $1 AND homework.class_id = classes.id AND (classes.school_id = $2 OR classes.school_id = $3) AND homework.deadline > $4 ORDER BY homework.deadline ASC LIMIT $5",
+            [req.params.id, res.locals.currentUser.id, res.locals.currentUser.school_id, new Date(req.query.date), req.query.length])
 
         res.status(201).json({
             success: true,

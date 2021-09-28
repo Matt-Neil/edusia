@@ -55,6 +55,7 @@ exports.postLogin = async (req, res, next) => {
                 throw "Wrong Email"
         }
     } catch (err) {
+        console.log(err)
         res.status(500).json({
             success: false,
             error: 'Server Error'
@@ -75,7 +76,6 @@ exports.postUser = async (req, res, next) => {
             success: true,
             data: user.rows[0]
         })
-
     } catch (err) {
         res.status(500).json({
             success: false,

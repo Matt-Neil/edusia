@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 const moment = require('moment');
 
-const HomeworkCardClass = ({homework}) => {
+const HomeworkCardClass = ({homework, classID}) => {
     const date = moment(homework.deadline);
 
     const displayDate = () => {
@@ -10,7 +10,7 @@ const HomeworkCardClass = ({homework}) => {
     }
 
     return (
-        <Link className="homeworkCardClass" to={`/homework/${homework.homework_id}/${homework.class_id}`}>
+        <Link className="homeworkCardClass" to={`/homework/${homework.id}/${classID}`}>
             <div className="homeworkCardClassBox">
                 <p className="homeworkCardClassTitle">{homework.title}</p>
             </div>

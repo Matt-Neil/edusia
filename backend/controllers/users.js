@@ -91,7 +91,7 @@ exports.getStudentLesson = async (req, res, next) => {
         let student;
 
         if (res.locals.currentUser.position === "teacher") {
-            student = await db.query("SELECT users.name, users.picture, users.username, users.email, users.id, classes.class_code FROM users INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = $2 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $2 AND classes.school_id = $3",
+            student = await db.query("SELECT users.name, users.picture, users.username, users.email, users.id, classes.class_code, classes.teacher_id FROM users INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = $2 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $2 AND classes.school_id = $3",
                 [req.params.id, req.query.class, res.locals.currentUser.school_id]);
         } else {
             student = await db.query("SELECT users.name, users.picture, users.username, users.email, users.id, classes.class_code FROM users INNER JOIN students_classes ON students_classes.student_id = $1 AND students_classes.class_id = $2 AND students_classes.student_id = users.id INNER JOIN classes ON classes.id = $2 AND classes.school_id = $3",
@@ -286,11 +286,11 @@ exports.getStudentsSchool = async (req, res, next) => {
         let students;
 
         if (req.query.id === undefined) {
-            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' ORDER BY id ASC LIMIT 10", 
-                [req.params.id]);
+            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' ORDER BY id ASC LIMIT $2", 
+                [req.params.id, req.query.length]);
         } else {
-            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' AND id > $2 ORDER BY id ASC LIMIT 10", 
-                [req.params.id, req.query.id]);
+            students = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'student' AND id > $2 ORDER BY id ASC LIMIT $3", 
+                [req.params.id, req.query.id, req.query.length]);
         }
 
         res.status(201).json({
@@ -310,11 +310,11 @@ exports.getTeachersSchool = async (req, res, next) => {
         let teachers;
 
         if (req.query.id === undefined) {
-            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' ORDER BY id ASC LIMIT 10", 
-                [req.params.id]);
+            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' ORDER BY id ASC LIMIT $2", 
+                [req.params.id, req.query.length]);
         } else {
-            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' AND id > $2 ORDER BY id ASC LIMIT 10", 
-                [req.params.id, req.query.id]);
+            teachers = await db.query("SELECT name, picture, username, id FROM users WHERE school_id = $1 AND position = 'teacher' AND id > $2 ORDER BY id ASC LIMIT $3", 
+                [req.params.id, req.query.id, req.query.length]);
         }
 
         res.status(201).json({
@@ -331,7 +331,7 @@ exports.getTeachersSchool = async (req, res, next) => {
 
 exports.getUser = async (req, res, next) => {
     try {
-        const user = await db.query("SELECT find.name, find.picture, find.username, find.email, find.id, find.position FROM users AS find INNER JOIN users AS joined ON find.id = $1 AND ((joined.id = $2 AND joined.school_id = find.school_id) OR find.school_id = $2)", 
+        const user = await db.query("SELECT find.name, find.picture, find.username, find.email, find.id, find.position, find.password FROM users AS find INNER JOIN users AS joined ON find.id = $1 AND ((joined.id = $2 AND joined.school_id = find.school_id) OR find.school_id = $2)", 
             [req.params.id, res.locals.currentUser.id]);
 
         if (res.locals.currentUser.position !== "student") {
@@ -379,29 +379,6 @@ exports.getUser = async (req, res, next) => {
     }
 }
 
-exports.getUserEdit = async (req, res, next) => {
-    try {
-        let user;
-
-        if (res.locals.currentUser.id === "teacher") {
-            user = await db.query("SELECT find.name, find.picture, find.username, find.email FROM users AS find INNER JOIN users AS joined ON find.id = $1 AND ((joined.id = $2 AND joined.school_id = find.school_id) OR find.school_id = $2)", 
-                [req.params.id, res.locals.currentUser.id]);
-        } else {
-            user = await db.query("SELECT name, picture, username, email, password, position FROM users WHERE id = $1 AND school_id = $2", [req.params.id, res.locals.currentUser.id]);
-        }
-        
-        res.status(201).json({
-            success: true,
-            data: user.rows[0]
-        })
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            error: 'Server Error'
-        })
-    }
-}
-
 exports.postUser = async (req, res, next) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password.toString(), 10);
@@ -426,8 +403,8 @@ exports.putUser = async (req, res, next) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password.toString(), 10);
 
-        const users = await db.query("UPDATE users SET name = $1, email = $2, username = $3, password = $4, picture = $5, position = $6 WHERE id = $7 returning *", 
-            [req.body.name, req.body.email, req.body.username, hashedPassword, req.body.picture, req.body.position, req.params.id]);
+        const users = await db.query("UPDATE users SET name = $1, email = $2, username = $3, password = $4, picture = $5 WHERE id = $6 returning *", 
+            [req.body.name, req.body.email, req.body.username, hashedPassword, req.body.picture, req.params.id]);
 
         await db.query("UPDATE users SET tokens = to_tsvector('english', coalesce(name, '') || ' ' || coalesce(username, '')) WHERE id = $1", [users.rows[0].id]);
 

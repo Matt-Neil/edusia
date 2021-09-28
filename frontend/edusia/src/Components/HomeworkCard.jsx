@@ -10,10 +10,18 @@ const HomeworkCard = ({homeworkReducer}) => {
     const timeoutID = useRef(null);
 
     useEffect(() => {
+        if (homeworkReducer.deadline < new Date().toISOString()) {
+            setExpired(true)
+        }
+    }, [])
+
+    useEffect(() => {
         if (!expired) {
             timeoutID.current = setTimeout(() => {
                 if (homeworkReducer.deadline > new Date().toISOString()) {
                     setExpired(false);
+                } else {
+                    setExpired(true)
                 }
             }, 1000)
             return () => {clearTimeout(timeoutID.current)}
