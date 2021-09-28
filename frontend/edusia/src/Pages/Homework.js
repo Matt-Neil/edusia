@@ -202,7 +202,7 @@ const Homework = ({currentUser}) => {
                                     </div>
                                 }
                                 <p className="homeworkTitle">{homework.title}</p>
-                                <p>Due: {displayDate()}</p>
+                                <p className="homeworkDate">Due: {displayDate()}</p>
                                 <p style={{margin: "50px 0 50px 0"}}>{homework.description}</p>
                                 {homework.file !== "" &&
                                     <a style={{margin: "25px 0 50px 0"}} className="download" href={`http://localhost:5000/uploads/${homework.file}`} download={homework.file} target="_blank">View Attachment</a>

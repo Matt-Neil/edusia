@@ -46,6 +46,7 @@ const Class = ({currentUser}) => {
     const {displayUpdatedMessage, displayDeletedMessage, displayErrorMessage, displayMessageUpdatedInterval, displayMessageDeletedInterval, displayMessageErrorInterval, error} = useContext(MessageContext);
     const classID = useParams().id;
     const history = useHistory();
+    const [tablet, setTablet] = useState(window.innerWidth < 1001);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -105,6 +106,15 @@ const Class = ({currentUser}) => {
         }
         fetchData()
     }, [])
+
+    useEffect(() => {
+        window.addEventListener("resize", updateMedia);
+        return () => window.removeEventListener("resize", updateMedia);
+    });
+
+    const updateMedia = () => {
+        setTablet(window.innerWidth < 1001);
+    };
 
     const loadMoreTests = async () => {
         if (tests.length !== 0 && !finishedTests) {
@@ -392,7 +402,7 @@ const Class = ({currentUser}) => {
                             <button className="toolbarItem buttonBlue" onClick={() => {changeStudents()}}>View Students</button>
                             <button className="toolbarItem buttonBlue" onClick={() => {changeHomework()}}>View Homework</button>
                             <button className="toolbarItem buttonBlue" onClick={() => {changeTests()}}>View Tests</button>
-                            <button className="toolbarItem buttonBlue" onClick={() => {changeNotifications()}}>View Notifications</button>
+                            <button style={{margin: "0 15px 0 15px"}} className="toolbarItem buttonBlue" onClick={() => {changeNotifications()}}>View Notifications</button>
                         </div>
                         {currentUser.position === "school" &&
                             <>
@@ -443,7 +453,7 @@ const Class = ({currentUser}) => {
                                             <>
                                                 <p className="pageTitle">Homework</p>
                                                 {currentUser.position === "teacher" && currentUser.id === classes.teacher_id &&
-                                                    <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {setAddHomework(true)}}>Add Homework</button>
+                                                    <button className="buttonBlue addButton" onClick={() => {setAddHomework(true)}}>Add Homework</button>
                                                 }
                                                 <div className="displayCardsRow">
                                                     {homework && homework.map((homework, i) => {
@@ -471,7 +481,7 @@ const Class = ({currentUser}) => {
                                             <>
                                                 <p className="pageTitle">Tests</p>
                                                 {currentUser.position === "teacher" && currentUser.id === classes.teacher_id &&
-                                                    <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {setAddTests(true)}}>Add Test</button>
+                                                    <button className="buttonBlue addButton" onClick={() => {setAddTests(true)}}>Add Test</button>
                                                 }
                                                 {tests.map((test, i) => {
                                                     return (
@@ -486,52 +496,67 @@ const Class = ({currentUser}) => {
                                                                                 title: e.target.value,
                                                                                 date: previousState[i].date
                                                                             }}))}} />
-                                                                            <DatePicker renderCustomHeader={({
-                                                                                            monthDate,
-                                                                                            customHeaderCount,
-                                                                                            decreaseMonth,
-                                                                                            increaseMonth,
-                                                                                        }) => (
-                                                                                            <div>
-                                                                                                <button aria-label="Previous Month"
-                                                                                                        type="button"
-                                                                                                        className={"react-datepicker__navigation react-datepicker__navigation--previous"}
-                                                                                                        style={customHeaderCount === 1 ? { visibility: "hidden" } : null}
-                                                                                                        onClick={decreaseMonth}>
-                                                                                                    <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"}>
-                                                                                                        {"<"}
+                                                                            {tablet ?
+                                                                                <DatePicker selected={new Date(updateTests[i].date)} 
+                                                                                            onChange={date => {setUpdateTests(previousState => Object.assign([], previousState, {[i]: {
+                                                                                                id: previousState[i].id,
+                                                                                                class_id: previousState[i].class_id,
+                                                                                                title: previousState[i].title,
+                                                                                                date: new Date(date).toISOString()
+                                                                                            }}))}} 
+                                                                                            dateFormat="dd/MM/yyyy"
+                                                                                            minDate={new Date()} 
+                                                                                            filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
+                                                                                            inline
+                                                                                            placeholderText={"Select Date"} />
+                                                                            :
+                                                                                <DatePicker renderCustomHeader={({
+                                                                                                monthDate,
+                                                                                                customHeaderCount,
+                                                                                                decreaseMonth,
+                                                                                                increaseMonth,
+                                                                                            }) => (
+                                                                                                <div>
+                                                                                                    <button aria-label="Previous Month"
+                                                                                                            type="button"
+                                                                                                            className={"react-datepicker__navigation react-datepicker__navigation--previous"}
+                                                                                                            style={customHeaderCount === 1 ? { visibility: "hidden" } : null}
+                                                                                                            onClick={decreaseMonth}>
+                                                                                                        <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"}>
+                                                                                                            {"<"}
+                                                                                                        </span>
+                                                                                                    </button>
+                                                                                                    <span className="react-datepicker__current-month">
+                                                                                                        {monthDate.toLocaleString("en-GB", {
+                                                                                                            month: "long",
+                                                                                                            year: "numeric",
+                                                                                                        })}
                                                                                                     </span>
-                                                                                                </button>
-                                                                                                <span className="react-datepicker__current-month">
-                                                                                                    {monthDate.toLocaleString("en-GB", {
-                                                                                                        month: "long",
-                                                                                                        year: "numeric",
-                                                                                                    })}
-                                                                                                </span>
-                                                                                                <button aria-label="Next Month"
-                                                                                                        type="button"
-                                                                                                        className={"react-datepicker__navigation react-datepicker__navigation--next"}
-                                                                                                        style={customHeaderCount === 0 ? { visibility: "hidden" } : null}
-                                                                                                        onClick={increaseMonth}>
-                                                                                                    <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--next"}>
-                                                                                                        {">"}
-                                                                                                    </span>
-                                                                                                </button>
-                                                                                            </div>
-                                                                                        )}
-                                                                                        monthsShown={2}
-                                                                                        selected={new Date(updateTests[i].date)} 
-                                                                                        onChange={date => {setUpdateTests(previousState => Object.assign([], previousState, {[i]: {
-                                                                                            id: previousState[i].id,
-                                                                                            class_id: previousState[i].class_id,
-                                                                                            title: previousState[i].title,
-                                                                                            date: new Date(date).toISOString()
-                                                                                        }}))}} 
-                                                                                        dateFormat="dd/MM/yyyy"
-                                                                                        minDate={new Date()} 
-                                                                                        filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
-                                                                                        inline
-                                                                                        placeholderText={"Select Date"} />
+                                                                                                    <button aria-label="Next Month"
+                                                                                                            type="button"
+                                                                                                            className={"react-datepicker__navigation react-datepicker__navigation--next"}
+                                                                                                            style={customHeaderCount === 0 ? { visibility: "hidden" } : null}
+                                                                                                            onClick={increaseMonth}>
+                                                                                                        <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--next"}>
+                                                                                                            {">"}
+                                                                                                        </span>
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            )}
+                                                                                            monthsShown={2}
+                                                                                            selected={new Date(updateTests[i].date)} 
+                                                                                            onChange={date => {setUpdateTests(previousState => Object.assign([], previousState, {[i]: {
+                                                                                                id: previousState[i].id,
+                                                                                                class_id: previousState[i].class_id,
+                                                                                                title: previousState[i].title,
+                                                                                                date: new Date(date).toISOString()
+                                                                                            }}))}} 
+                                                                                            dateFormat="dd/MM/yyyy"
+                                                                                            minDate={new Date()} 
+                                                                                            filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
+                                                                                            inline
+                                                                                            placeholderText={"Select Date"} />
+                                                                            }
                                                                         </div>
                                                                         <div className="formSubmit">
                                                                             <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update Test" />
@@ -544,8 +569,8 @@ const Class = ({currentUser}) => {
                                                                     <TestCard test={test} classID={classID} />
                                                                     {currentUser.position === "teacher" && currentUser.id === classes.teacher_id &&
                                                                         <>
-                                                                            <button style={{margin: "0 15px 0 0"}} className="buttonBlue" onClick={() => {setEditTests(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
-                                                                            <button className="buttonOrange" onClick={() => {deleteTest(test.id, i)}}>Delete</button>
+                                                                            <button style={{margin: "15px 15px 0 0"}} className="buttonBlue" onClick={() => {setEditTests(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
+                                                                            <button style={{margin: "15px 15px 0 0"}} className="buttonOrange" onClick={() => {deleteTest(test.id, i)}}>Delete</button>
                                                                         </>
                                                                     }
                                                                 </div>
@@ -574,7 +599,7 @@ const Class = ({currentUser}) => {
                                             <>
                                                 <p className="pageTitle">Notifications</p>
                                                 {currentUser.position === "teacher" && currentUser.id === classes.teacher_id &&
-                                                    <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {setAddNotifications(true)}}>Add Notification</button>
+                                                    <button className="buttonBlue addButton" onClick={() => {setAddNotifications(true)}}>Add Notification</button>
                                                 }
                                                 {notifications.map((notification, i) => {
                                                     return (
@@ -588,51 +613,65 @@ const Class = ({currentUser}) => {
                                                                                 expire: previousState[i].expire,
                                                                                 notification: e.target.value
                                                                             }}))}} />
-                                                                            <DatePicker renderCustomHeader={({
-                                                                                            monthDate,
-                                                                                            customHeaderCount,
-                                                                                            decreaseMonth,
-                                                                                            increaseMonth,
-                                                                                        }) => (
-                                                                                            <div>
-                                                                                                <button aria-label="Previous Month"
-                                                                                                        type="button"
-                                                                                                        className={"react-datepicker__navigation react-datepicker__navigation--previous"}
-                                                                                                        style={customHeaderCount === 1 ? { visibility: "hidden" } : null}
-                                                                                                        onClick={decreaseMonth}>
-                                                                                                    <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"}>
-                                                                                                        {"<"}
+                                                                            {tablet ?
+                                                                                <DatePicker selected={new Date(updateNotifications[i].expire)} 
+                                                                                            onChange={date => {setUpdateNotifications(previousState => Object.assign([], previousState, {[i]: {
+                                                                                                id: previousState[i].id,
+                                                                                                expire: new Date(date).toISOString(),
+                                                                                                notification: previousState[i].notification
+                                                                                            }}))}} 
+                                                                                            dateFormat="dd/MM/yyyy"
+                                                                                            minDate={new Date()} 
+                                                                                            filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
+                                                                                            inline
+                                                                                            placeholderText={"Select Date"} />
+                                                                            :
+                                                                                <DatePicker renderCustomHeader={({
+                                                                                                monthDate,
+                                                                                                customHeaderCount,
+                                                                                                decreaseMonth,
+                                                                                                increaseMonth,
+                                                                                            }) => (
+                                                                                                <div>
+                                                                                                    <button aria-label="Previous Month"
+                                                                                                            type="button"
+                                                                                                            className={"react-datepicker__navigation react-datepicker__navigation--previous"}
+                                                                                                            style={customHeaderCount === 1 ? { visibility: "hidden" } : null}
+                                                                                                            onClick={decreaseMonth}>
+                                                                                                        <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"}>
+                                                                                                            {"<"}
+                                                                                                        </span>
+                                                                                                    </button>
+                                                                                                    <span className="react-datepicker__current-month">
+                                                                                                        {monthDate.toLocaleString("en-GB", {
+                                                                                                            month: "long",
+                                                                                                            year: "numeric",
+                                                                                                        })}
                                                                                                     </span>
-                                                                                                </button>
-                                                                                                <span className="react-datepicker__current-month">
-                                                                                                    {monthDate.toLocaleString("en-GB", {
-                                                                                                        month: "long",
-                                                                                                        year: "numeric",
-                                                                                                    })}
-                                                                                                </span>
-                                                                                                <button aria-label="Next Month"
-                                                                                                        type="button"
-                                                                                                        className={"react-datepicker__navigation react-datepicker__navigation--next"}
-                                                                                                        style={customHeaderCount === 0 ? { visibility: "hidden" } : null}
-                                                                                                        onClick={increaseMonth}>
-                                                                                                    <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--next"}>
-                                                                                                        {">"}
-                                                                                                    </span>
-                                                                                                </button>
-                                                                                            </div>
-                                                                                        )}
-                                                                                        monthsShown={2}
-                                                                                        selected={new Date(updateNotifications[i].expire)} 
-                                                                                        onChange={date => {setUpdateNotifications(previousState => Object.assign([], previousState, {[i]: {
-                                                                                            id: previousState[i].id,
-                                                                                            expire: new Date(date).toISOString(),
-                                                                                            notification: previousState[i].notification
-                                                                                        }}))}} 
-                                                                                        dateFormat="dd/MM/yyyy"
-                                                                                        minDate={new Date()} 
-                                                                                        filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
-                                                                                        inline
-                                                                                        placeholderText={"Select Date"} />
+                                                                                                    <button aria-label="Next Month"
+                                                                                                            type="button"
+                                                                                                            className={"react-datepicker__navigation react-datepicker__navigation--next"}
+                                                                                                            style={customHeaderCount === 0 ? { visibility: "hidden" } : null}
+                                                                                                            onClick={increaseMonth}>
+                                                                                                        <span className={"react-datepicker__navigation-icon react-datepicker__navigation-icon--next"}>
+                                                                                                            {">"}
+                                                                                                        </span>
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            )}
+                                                                                            monthsShown={2}
+                                                                                            selected={new Date(updateNotifications[i].expire)} 
+                                                                                            onChange={date => {setUpdateNotifications(previousState => Object.assign([], previousState, {[i]: {
+                                                                                                id: previousState[i].id,
+                                                                                                expire: new Date(date).toISOString(),
+                                                                                                notification: previousState[i].notification
+                                                                                            }}))}} 
+                                                                                            dateFormat="dd/MM/yyyy"
+                                                                                            minDate={new Date()} 
+                                                                                            filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
+                                                                                            inline
+                                                                                            placeholderText={"Select Date"} />
+                                                                            }   
                                                                         </div>
                                                                         <div className="formSubmit">
                                                                             <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update Notification" />
@@ -641,15 +680,15 @@ const Class = ({currentUser}) => {
                                                                     </form>
                                                                 </>
                                                             :
-                                                                <div className="cardPair">
+                                                                <>
                                                                     <NotificationCardClass notification={notification} />
                                                                     {currentUser.position === "teacher" && currentUser.id === classes.teacher_id &&
-                                                                        <>
-                                                                            <button style={{margin: "0 15px 0 0"}} className="buttonBlue" onClick={() => {setEditNotifications(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
-                                                                            <button className="buttonOrange" onClick={() => {deleteNotification(notification.id, i)}}>Delete</button>
-                                                                        </>
+                                                                        <div className="cardPair">
+                                                                            <button style={{margin: "15px 15px 0 0"}} className="buttonBlue" onClick={() => {setEditNotifications(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
+                                                                            <button style={{margin: "15px 15px 0 0"}} className="buttonOrange" onClick={() => {deleteNotification(notification.id, i)}}>Delete</button>
+                                                                        </div>
                                                                     }
-                                                                </div>
+                                                                </>
                                                             }    
                                                         </div>
                                                     )

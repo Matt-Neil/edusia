@@ -92,20 +92,20 @@ const Test = ({currentUser}) => {
                                     {edit[i] ?
                                         <>
                                             <form method="PUT" onSubmit={updateGrade} id={i}>
-                                                <input style={{margin: "0 15px 0 0"}} className="textInput" type="text" name="grade" placeholder="Grade" value={updateGrades[i]} onChange={e => {setUpdateGrades(previousState => Object.assign([], previousState, {[i]: e.target.value}))}} />
+                                                <input style={{margin: "15px 15px 15px 0"}} className="textInput" type="text" name="grade" placeholder="Grade" value={updateGrades[i]} onChange={e => {setUpdateGrades(previousState => Object.assign([], previousState, {[i]: e.target.value}))}} />
                                                 <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update" />
                                                 <button className="buttonOrange" onClick={() => {cancelGrade(i)}}>Cancel</button>
                                             </form>
                                         </>
                                     :
-                                        <>
+                                        <div className="cardPair">
                                             {grades[i] ?
                                                 <p>Grade: {grades[i]}</p>  
                                             :
                                                 <p>No Grade</p>  
                                             }
                                             {currentUser.id === test.teacher_id && <button style={{margin: "0 0 0 15px"}} className="buttonBlue" onClick={() => {setEdit(previousState => Object.assign([], previousState, {[i]: true}))}}>Update Grade</button>}
-                                        </>
+                                        </div>
                                     }
                                 </div>
                             )

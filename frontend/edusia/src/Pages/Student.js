@@ -31,6 +31,7 @@ const Student = ({currentUser}) => {
     const studentID = useParams().id;
     const classID = useParams().class;
     const history = useHistory();
+    const [tablet, setTablet] = useState(window.innerWidth < 1001);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -79,6 +80,15 @@ const Student = ({currentUser}) => {
         }
         fetchData()
     }, [])
+
+    useEffect(() => {
+        window.addEventListener("resize", updateMedia);
+        return () => window.removeEventListener("resize", updateMedia);
+    });
+
+    const updateMedia = () => {
+        setTablet(window.innerWidth < 1001);
+    };
 
     const loadMoreNotes = async () => {
         if (notes.length !== 0 && !finishedNotes) {
@@ -265,7 +275,7 @@ const Student = ({currentUser}) => {
                                                             <form method="PUT" onSubmit={updateNote} id={i}>
                                                                 <textarea style={{margin: "25px 0 0 0"}} className="textAreaInput" type="text" name="note" placeholder="Note" maxLength="150" rows="4" value={updateNotes[i]} onChange={e => {setUpdateNotes(previousState => Object.assign([], previousState, {[i]: e.target.value}))}} />
                                                                 <div className="formSubmit">
-                                                                    <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update" />
+                                                                    <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update Note" />
                                                                     <button className="buttonOrange" type="button" onClick={() => {setEditNotes(previousState => Object.assign([], previousState, {[i]: false}))}}>Cancel</button>
                                                                 </div>
                                                             </form>
@@ -275,8 +285,8 @@ const Student = ({currentUser}) => {
                                                             <NoteCard note={note} />
                                                             {currentUser.position === "teacher" && currentUser.id === student.teacher_id &&
                                                                 <>
-                                                                    <button style={{margin: "0 15px 0 0"}} className="buttonBlue" onClick={() => {setEditNotes(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
-                                                                    <button className="buttonOrange" onClick={() => {deleteNote(note.id, i)}}>Delete</button>
+                                                                    <button style={{margin: "15px 15px 0 0"}} className="buttonBlue" onClick={() => {setEditNotes(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
+                                                                    <button style={{margin: "15px 15px 0 0"}} className="buttonOrange" onClick={() => {deleteNote(note.id, i)}}>Delete</button>
                                                                 </>
                                                             }
                                                         </div>
@@ -326,6 +336,20 @@ const Student = ({currentUser}) => {
                                                                         reason: e.target.value
                                                                     }}))}} />
                                                                 </div>
+                                                                {tablet ?
+                                                                    <DatePicker selected={new Date(updateDetentions[i].date)} 
+                                                                                onChange={date => {setUpdateDetentions(previousState => Object.assign([], previousState, {[i]: {
+                                                                                    id: previousState[i].id,
+                                                                                    date: new Date(date).toISOString(),
+                                                                                    location: previousState[i].location,
+                                                                                    reason: previousState[i].reason
+                                                                                }}))}} 
+                                                                                dateFormat="dd/MM/yyyy"
+                                                                                minDate={new Date()} 
+                                                                                filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
+                                                                                inline
+                                                                                placeholderText={"Select Date"} />
+                                                                :
                                                                     <DatePicker renderCustomHeader={({
                                                                                     monthDate,
                                                                                     customHeaderCount,
@@ -372,6 +396,7 @@ const Student = ({currentUser}) => {
                                                                                 filterDate={date => date.getDay() !== 6 && date.getDay() !== 0}
                                                                                 inline
                                                                                 placeholderText={"Select Date"} />
+                                                                }
                                                                 <div className="formSubmit">
                                                                     <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Update Detention" />
                                                                     <button className="buttonOrange" type="button" onClick={() => {setEditDetentions(previousState => Object.assign([], previousState, {[i]: false}))}}>Cancel</button>
@@ -384,8 +409,8 @@ const Student = ({currentUser}) => {
                                                                 <DetentionCardClass detention={detention} />
                                                                 {currentUser.position === "teacher" && currentUser.id === student.teacher_id &&
                                                                     <>
-                                                                        <button style={{margin: "0 15px 0 0"}} className="buttonBlue" onClick={() => {setEditDetentions(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
-                                                                        <button className="buttonOrange" onClick={() => {deleteDetention(detention.id, i)}}>Delete</button>
+                                                                        <button style={{margin: "15px 15px 0 0"}} className="buttonBlue" onClick={() => {setEditDetentions(previousState => Object.assign([], previousState, {[i]: true}))}}>Update</button>
+                                                                        <button style={{margin: "15px 15px 0 0"}} className="buttonOrange" onClick={() => {deleteDetention(detention.id, i)}}>Delete</button>
                                                                     </>
                                                                 }
                                                             </div>

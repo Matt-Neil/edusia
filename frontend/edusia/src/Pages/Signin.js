@@ -95,7 +95,7 @@ const LogIn = () => {
                                 <input style={{margin: "5px 0 15px 0"}} className="textInput" type="text" name="email" placeholder="Email" value={email} onChange={e => {setEmail(e.target.value)}} />
                                 <input style={{margin: "5px 0 25px 0"}} className="textInput" type="password" name="password" placeholder="Password" value={password} onChange={e => {setPassword(e.target.value)}} />
                             </div>
-                            <input style={{margin: "0 15px 0 0"}} className="buttonBlue" type="submit" value="Register School" />
+                            <input style={{margin: "0 15px 15px 0"}} className="buttonBlue" type="submit" value="Register School" />
                             <button className="buttonOrange" type="button" onClick={() => {setLogin(true)}}>Already Have an Account?</button>
                         </form>
                     }

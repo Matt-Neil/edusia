@@ -39,41 +39,11 @@ select {
   width: 100%;
   overflow-y: scroll
 }
-.innerBody {
-  margin: 0 25px 25px 25px;
-}
-.checkboxLabel {
-  margin: 0 0 0 7px;
-}
-.settingsPicture {
-  margin: 25px 0 0 0;
-  width: 250px;
-  height: 250px;
-}
 .pictureInput {
   margin: 0 0 20px 0;
 }
 .multipleTextInput {
   margin: -15px 0 -15px 0;
-}
-.textInput {
-  margin: 25px 0 15px 0;
-  padding: 0 15px;
-  width: 220px;
-  border-radius: 15px;
-  height: 40px;
-  border: none;
-  outline-style: none;
-}
-.textAreaInput {
-  margin: 25px 0 15px 0;
-  padding: 10px 15px;
-  width: 450px;
-  border-radius: 15px;
-  height: fit-content;
-  border: none;
-  outline-style: none;
-  resize: none;
 }
 .sideBarExpanded {
   display: flex;
@@ -87,6 +57,12 @@ select {
   display: flex;
   flex-direction: column;
   width: 80px;
+  background-color: #142843;
+}
+.sideBarMobile {
+  display: flex;
+  flex-direction: column;
+  width: 50px;
   background-color: #142843;
 }
 .sideBarTitle {
@@ -107,6 +83,13 @@ select {
   font-size: 32px;
   font-weight: 100;
 }
+.titleMobile {
+  margin: 15px 10px;
+  font-family: 'Quicksand', sans-serif;
+  color: white;
+  font-size: 24px;
+  font-weight: 100;
+}
 .sideBarUser {
   display: flex;
   align-items: center;
@@ -124,6 +107,12 @@ select {
   height: 40px;
   margin: 35px 20px;
   border-radius: 50px;
+}
+.currentUserPictureMobile {
+  width: 36px;
+  height: 36px;
+  margin: 35px 7px;
+  border-radius: 36px;
 }
 .currentUserName {
   margin: 0 25px 0 0;
@@ -152,6 +141,19 @@ select {
   text-decoration: none;
   cursor: pointer;
 }
+.sideBarLinkMobile:first-child {
+  margin: 40px 13px 20px 13px;
+}
+.sideBarLinkMobile {
+  text-align: left;
+  margin: 20px 13px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
 .sideBarCollapse {
   color: white;
   position: absolute;
@@ -159,65 +161,14 @@ select {
   bottom: 20px;
   cursor: pointer;
 }
-.pageTitle {
-  margin: 25px 0 10px 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-}
-.homeworkTitle {
-  margin: 25px 0 10px 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 24px;
-  font-weight: 400;
-}
-.header {
-  position: sticky;
-  top: 0;
-  display: flex;
-  align-items: center;
-  height: 70px;
-  background-color: white;
-  border-bottom: 1px #EAEBEE solid;
-}
-.headerLocation {
-  margin: 0 25px 0 25px;
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  color: #2B2B2B;
-  font-weight: 500;
-}
-.headerPath {
-  margin: 0 25px 0 25px;
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  color: #2B2B2B;
-  font-weight: 300;
-  text-decoration: none;
-}
 .headerPair {
   display: flex;
   align-items: center;
-}
-.toolbar {
-  position: sticky;
-  top: 71px;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 60px;
-  background-color: #FBFBFB;
-  border-bottom: 1px #EAEBEE solid;
 }
 .toolbarLeft {
   display: flex;
   align-items: center;
   flex: 1;
-}
-.toolbarItem {
-  display: flex;
-  align-items: center;
-  margin: 0 0 0 25px;
 }
 .buttonBlue {
   font-family: 'Inter', sans-serif;
@@ -245,53 +196,6 @@ select {
   cursor: pointer;
   text-decoration: none;
 }
-.homeworkCard {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 100px;
-  margin: 25px 0;
-  height: fit-content;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-}
-.homeworkCardLink {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 100px;
-  color: #2b2b2b;
-  border-radius: 15px 0 0 15px;
-  text-decoration: none;
-}
-.homeworkCardButton {
-  margin: 0 25px 0 50px;
-}
-.homeworkCardTitle {
-  margin: 0 25px;
-  flex: 5;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-}
-.homeworkCardInfo {
-  min-width: 125px;
-  margin: 0 25px 0 25px;
-  flex: 1;
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  font-weight: 200;
-}
-.homeworkCardInfo:nth-child(2) {
-  text-align: center;
-}
-.homeworkCardInfo:nth-child(3) {
-  text-align: center;
-}
-.homeworkCardInfo:last-child {
-  text-align: end;
-}
 .userPageRows {
   display: flex;
   flex-wrap: wrap;
@@ -299,36 +203,6 @@ select {
 .displayCardsRow {
   display: flex;
   flex-wrap: wrap;
-}
-.classCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 250px;
-  height: fit-content;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
-}
-.classCardTitle {
-  margin: 20px 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-}
-.detentionCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 200px;
-  height: 150px;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
 }
 .detentionCardTitle {
   margin: 20px 0;
@@ -341,17 +215,6 @@ select {
   font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 200;
-}
-.notificationCard {
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  height: fit-content;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
 }
 .notificationCardHeader {
   display: flex;
@@ -377,46 +240,6 @@ select {
   color: black;
   font-weight: 200;
 }
-.userCard {
-  display: flex;
-  align-items: center;
-  width: 350px;
-  height: 110px;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
-}
-.userCardTitle {
-  margin: 20px 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-}
-.userCardPicture {
-  margin: 0 20px 0 20px;
-  width: 70px;
-  height: 70px;
-  border-radius: 35px;
-}
-.homeworkCardClass {
-  display: flex;
-  align-items: center;
-  width: 600px;
-  height: fit-content;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
-}
-.homeworkCardClassTitle {
-  margin: 20px 20px;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-}
 .homeworkCardClassInfo {
   margin: 20px 20px 20px auto;
   font-family: 'Inter', sans-serif;
@@ -427,23 +250,6 @@ select {
 .homeworkCardClassBox {
   flex: 1;
 }
-.testCard {
-  display: flex;
-  align-items: center;
-  width: 600px;
-  height: fit-content;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
-}
-.testCardTitle {
-  margin: 20px 20px;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-}
 .testCardInfo {
   margin: 20px 20px 20px auto;
   font-family: 'Inter', sans-serif;
@@ -453,27 +259,6 @@ select {
 }
 .testCardBox {
   flex: 1;
-}
-.cardPair {
-  display: flex;
-  align-items: center;
-}
-.notificationCardClass {
-  display: flex;
-  align-items: center;
-  width: 600px;
-  height: fit-content;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
-}
-.notificationCardClassTitle {
-  margin: 20px 20px;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
 }
 .notificationCardClassInfo {
   margin: 20px 20px 20px auto;
@@ -505,13 +290,6 @@ select {
   display: flex;
   align-items: center;
 }
-.userBox {
-  display: flex;
-  margin: 25px 0 0 0;
-}
-.userInfo {
-  margin: -15px 0 0 0;
-}
 .userPicture {
   width: 250px;
   height: 250px;
@@ -534,49 +312,8 @@ select {
   color: #2b2b2b;
   text-decoration: none;
 }
-.detentionCardClass {
-  display: flex;
-  align-items: center;
-  width: 600px;
-  height: fit-content;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
-}
-.detentionCardClassTitle {
-  margin: 20px 20px;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-}
-.detentionCardClassInfo {
-  margin: 20px 20px 20px auto;
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  color: black;
-  font-weight: 200;
-}
 .detentionCardClassBox {
   flex: 1;
-}
-.noteCard {
-  display: flex;
-  align-items: center;
-  width: 600px;
-  height: fit-content;
-  margin: 25px 25px 0 0;
-  color: #2b2b2b;
-  background-color: white;
-  border-radius: 15px;
-  text-decoration: none;
-}
-.noteCardTitle {
-  margin: 20px 20px;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
 }
 .noteCardInfo {
   margin: 20px 20px 20px auto;
@@ -615,18 +352,6 @@ select {
   margin: 0 auto;
   bottom: 0;
 }
-.loginBody {
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  height: fit-content;
-  padding: 25px 0 50px 0;
-  background-color: #142843;
-  border-radius: 20px;
-}
-.loginForm {
-  margin: 0 auto;
-}
 .form {
   display: flex;
   flex-direction: column;
@@ -634,10 +359,682 @@ select {
 .middleBody {
   position: fixed;
   left: 50%;
-  bottom: 50%;
-  transform: translate(-50%, -50%);;
+  bottom: 35%;
+  transform: translate(-50%, -35%);
 }
 .download {
   font-family: 'Inter', sans-serif;
   color: #287AC9;
 }
+
+@media screen and (min-width: 1201px) {
+  .innerBody {
+    margin: 0 25px 25px 25px;
+  }
+  .toolbar {
+    position: sticky;
+    top: 71px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    background-color: #FBFBFB;
+    border-bottom: 1px #EAEBEE solid;
+  }
+  .header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    height: 70px;
+    background-color: white;
+    border-bottom: 1px #EAEBEE solid;
+  }
+  .headerLocation {
+    margin: 0 25px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #2B2B2B;
+    font-weight: 500;
+  }
+  .headerPath {
+    margin: 0 25px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #2B2B2B;
+    font-weight: 300;
+    text-decoration: none;
+  }
+  .homeworkCardInfo {
+    min-width: 125px;
+    margin: 0 25px;
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 200;
+  }
+  .homeworkCardTitle {
+    margin: 0 25px;
+    flex: 5;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .toolbarItem {
+    display: flex;
+    align-items: center;
+    margin: 0 0 0 25px;
+  }
+  .homeworkCard {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 100px;
+    margin: 25px 0;
+    height: fit-content;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+  }
+  .notificationCard {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .detentionCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+    height: 150px;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .classCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 250px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .homeworkTitle {
+    margin: 25px 0 10px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+  }
+  .homeworkDate {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .innerBody {
+    margin: 0 15px 15px 15px;
+  }
+  .toolbar {
+    position: sticky;
+    overflow: auto;
+    white-space: nowrap;
+    top: 71px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    background-color: #FBFBFB;
+    border-bottom: 1px #EAEBEE solid;
+  }
+  .header {
+    position: sticky;
+    top: 0;
+    overflow: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    height: 70px;
+    background-color: white;
+    border-bottom: 1px #EAEBEE solid;
+  }
+  .headerLocation {
+    margin: 0 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #2B2B2B;
+    font-weight: 500;
+  }
+  .headerPath {
+    margin: 0 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #2B2B2B;
+    font-weight: 300;
+    text-decoration: none;
+  }
+  .homeworkCardTitle {
+    margin: 0 15px;
+    min-width: 150px;
+    flex: 5;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .toolbarItem {
+    display: flex;
+    align-items: center;
+    margin: 0 0 0 15px;
+  }
+  .homeworkCard {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 100px;
+    margin: 15px 0;
+    height: fit-content;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+  }
+  .notificationCard {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    height: fit-content;
+    margin: 15px 15px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .detentionCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+    height: 150px;
+    margin: 15px 15px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .classCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 250px;
+    height: fit-content;
+    margin: 15px 15px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .homeworkTitle {
+    margin: 15px 0 10px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .homeworkDate {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .checkboxLabel {
+    margin: 0 0 0 7px;
+  }
+  .pageTitle {
+    margin: 25px 0 10px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .homeworkCardLink {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100px;
+    color: #2b2b2b;
+    border-radius: 15px 0 0 15px;
+    text-decoration: none;
+  }
+  .homeworkCardBox {
+    display: flex;
+    align-items: center;
+  }
+  .homeworkCardButton {
+    margin: 0 25px 0 50px;
+  }
+  .homeworkCardInfo:nth-child(2) {
+    text-align: center;
+  }
+  .homeworkCardInfo:nth-child(3) {
+    text-align: center;
+  }
+  .homeworkCardInfo:last-child {
+    text-align: end;
+  }
+  .classCardTitle {
+    margin: 20px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .addButton {
+    margin: 25px 0 0 0;
+  }
+  .settingsPicture {
+    margin: 25px 0 0 0;
+    width: 250px;
+    height: 250px;
+  }
+  .textInput {
+    margin: 25px 0 15px 0;
+    padding: 0 15px;
+    width: 220px;
+    border-radius: 15px;
+    height: 40px;
+    border: none;
+    outline-style: none;
+  }
+  .textAreaInput {
+    margin: 25px 0 15px 0;
+    padding: 10px 15px;
+    width: 450px;
+    border-radius: 15px;
+    height: fit-content;
+    border: none;
+    outline-style: none;
+    resize: none;
+  }
+  .cardPair {
+    display: flex;
+    align-items: center;
+  }
+  .userBox {
+    display: flex;
+    margin: 25px 0 0 0;
+  }
+  .userInfo {
+    margin: -15px 0 0 0;
+  }
+  .loginBody {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: fit-content;
+    padding: 25px 0 50px 0;
+    background-color: #142843;
+    border-radius: 20px;
+  }
+  .loginForm {
+    margin: 0 auto;
+  }
+  .homeworkCardClass {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .homeworkCardClassTitle {
+    margin: 20px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .testCard {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .testCardTitle {
+    margin: 20px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .notificationCardClass {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .notificationCardClassTitle {
+    margin: 20px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .userCard {
+    display: flex;
+    align-items: center;
+    width: 350px;
+    height: 110px;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .userCardTitle {
+    margin: 20px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .userCardPicture {
+    margin: 0 20px 0 20px;
+    width: 70px;
+    height: 70px;
+    border-radius: 35px;
+  }
+  .noteCard {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .noteCardTitle {
+    margin: 20px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .detentionCardClass {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .detentionCardClassTitle {
+    margin: 20px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .detentionCardClassInfo {
+    margin: 20px 20px 20px auto;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: black;
+    font-weight: 200;
+  }
+}
+
+@media screen and (min-width: 801px) and (max-width: 1200px) {
+  .homeworkCardInfo {
+    min-width: 125px;
+    margin: 0 -10px;
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 200;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .checkboxLabel {
+    margin: 0 0 0 7px;
+    font-size: 12px;
+  }
+  .pageTitle {
+    margin: 15px 0 10px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .homeworkCardLink {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    flex: 1;
+    margin: 10px 0;
+    height: fit-content;
+    color: #2b2b2b;
+    border-radius: 15px 0 0 15px;
+    text-decoration: none;
+  }
+  .homeworkCardBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 15px 0 0 0;
+  }
+  .homeworkCardButton {
+    margin: 0 25px 0 25px;
+  }
+  .homeworkCardInfo {
+    min-width: 125px;
+    margin: 0 0 3px 15px;
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 200;
+  }
+  .classCardTitle {
+    margin: 20px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .userCardTitle {
+    margin: 20px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .addButton {
+    margin: 15px 0 0 0;
+  }
+  .settingsPicture {
+    margin: 15px 0 0 0;
+    width: 200px;
+    height: 200px;
+  }
+  .textInput {
+    margin: 25px 0 15px 0;
+    padding: 0 15px;
+    width: 200px;
+    border-radius: 15px;
+    height: 40px;
+    border: none;
+    outline-style: none;
+  }
+  .textAreaInput {
+    margin: 25px 0 15px 0;
+    padding: 10px 15px;
+    width: 200px;
+    border-radius: 15px;
+    height: fit-content;
+    border: none;
+    outline-style: none;
+    resize: none;
+  }
+  .cardPair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .userBox {
+    margin: 15px 0 0 0;
+  }
+  .userInfo {
+    margin: 0 0 25px 0;
+  }
+  .loginBody {
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+    width: 100%;
+    height: fit-content;
+    padding: 15px 0 40px 0;
+    background-color: #142843;
+    border-radius: 20px;
+  }
+  .loginForm {
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+  .homeworkCardClass {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .homeworkCardClassTitle {
+    margin: 20px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .testCard {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .testCardTitle {
+    margin: 20px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .notificationCardClass {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .notificationCardClassTitle {
+    margin: 20px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .userCard {
+    display: flex;
+    align-items: center;
+    min-width: 275px;
+    height: 110px;
+    margin: 15px 15px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .userCardTitle {
+    margin: 10px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .userCardPicture {
+    margin: 0 15px 0 15px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+  }
+  .noteCard {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .noteCardTitle {
+    margin: 20px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .detentionCardClass {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    height: fit-content;
+    margin: 25px 25px 0 0;
+    color: #2b2b2b;
+    background-color: white;
+    border-radius: 15px;
+    text-decoration: none;
+  }
+  .detentionCardClassTitle {
+    margin: 15px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .detentionCardClassInfo {
+    margin: 20px 20px 20px auto;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: black;
+    font-weight: 200;
+  }
+}
+

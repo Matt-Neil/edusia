@@ -13,7 +13,7 @@ const DetentionCard = ({detention}) => {
             <div className="detentionCardClassBox">
                 <p className="detentionCardClassTitle">{detention.reason}</p>
             </div>
-            <p style={{margin: "0 30px 0 0"}} className="detentionCardClassInfo">{displayDate()}</p>
+            <p style={{margin: "0 30px 0 15px"}} className="detentionCardClassInfo">{displayDate()}</p>
             <p className="detentionCardClassInfo">{detention.location}</p>
         </div>
     )

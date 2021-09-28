@@ -358,7 +358,7 @@ const Home = ({currentUser}) => {
                                     <input style={{margin: "0 10px 0 0"}} className="buttonBlue" type="submit" value="Search" />
                                     <button style={{margin: "0 10px 0 0"}} type="button" className="buttonOrange" onClick={() => {cancelSearch()}}>Cancel Search</button>
                                 </form>
-                                <select style={{margin: "0 25px 0 0"}} className="select" onChange={e => {setSearchOptions(e.target.value)}}>
+                                <select style={{margin: "0 25px 0 15px"}} className="select" onChange={e => {setSearchOptions(e.target.value)}}>
                                     <option value="students">Search Students</option>
                                     <option value="teachers">Search Teachers</option>
                                     <option value="all">Search All Users</option>
@@ -423,7 +423,7 @@ const Home = ({currentUser}) => {
                                                     </>
                                                 :
                                                     <>
-                                                        <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {addStudentPage()}}>Add Student</button>
+                                                        <button className="buttonBlue addButton" onClick={() => {addStudentPage()}}>Add Student</button>
                                                         <div className="userPageRows">
                                                             { students && students.map((userReducer, i) => {
                                                                 return <UserCard user={userReducer} key={i} />
@@ -447,7 +447,7 @@ const Home = ({currentUser}) => {
                                                     </>
                                                 :
                                                     <>
-                                                        <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {addTeacherPage()}}>Add Teacher</button>
+                                                        <button className="buttonBlue addButton" onClick={() => {addTeacherPage()}}>Add Teacher</button>
                                                         <div className="userPageRows">
                                                             { teachers && teachers.map((userReducer, i) => {
                                                                 return <UserCard user={userReducer} key={i} />
@@ -471,7 +471,7 @@ const Home = ({currentUser}) => {
                                                     </>
                                                 :
                                                     <>
-                                                        <button style={{margin: "25px 0 0 0"}} className="buttonBlue" onClick={() => {addClassPage()}}>Add Class</button>
+                                                        <button className="buttonBlue addButton" onClick={() => {addClassPage()}}>Add Class</button>
                                                         <div className="userPageRows">
                                                             { classes && classes.map((classesReducer, i) => {
                                                                 return <ClassCard classesReducer={classesReducer} key={i} />
